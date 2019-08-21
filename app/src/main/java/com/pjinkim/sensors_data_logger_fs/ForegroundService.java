@@ -13,12 +13,20 @@ import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
 public class ForegroundService extends Service {
+
+    // properties
     public static final String CHANNEL_ID = "ForegroundServiceChannel";
+    private static final String LOG_TAG = ForegroundService.class.getName();
+    private IMUSession mIMUSession;
 
 
+    // Android service lifecycle states
     @Override
     public void onCreate() {
         super.onCreate();
+
+        //
+        mIMUSession = new IMUSession(this);
     }
 
 
@@ -60,6 +68,7 @@ public class ForegroundService extends Service {
     }
 
 
+    // methods
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel serviceChannel = new NotificationChannel(
