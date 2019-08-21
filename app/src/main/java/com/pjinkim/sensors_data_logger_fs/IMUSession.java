@@ -33,10 +33,6 @@ public class IMUSession implements SensorEventListener {
     private AtomicBoolean mIsRecording = new AtomicBoolean(false);
     private AtomicBoolean mIsWritingFile = new AtomicBoolean(false);
 
-    private float[] mAcceMeasure = new float[3];
-    private float[] mGyroMeasure = new float[3];
-    private float[] mMagnetMeasure = new float[3];
-
     private float[] mAcceBias = new float[3];
     private float[] mGyroBias = new float[3];
     private float[] mMagnetBias = new float[3];
@@ -166,9 +162,6 @@ public class IMUSession implements SensorEventListener {
         try {
             switch (eachSensor.getType()) {
                 case Sensor.TYPE_ACCELEROMETER:
-                    mAcceMeasure[0] = sensorEvent.values[0];
-                    mAcceMeasure[1] = sensorEvent.values[1];
-                    mAcceMeasure[2] = sensorEvent.values[2];
                     if (isFileSaved) {
                         mFileStreamer.addRecord(timestamp, "acce", 3, sensorEvent.values);
                     }
@@ -185,9 +178,6 @@ public class IMUSession implements SensorEventListener {
                     break;
 
                 case Sensor.TYPE_GYROSCOPE:
-                    mGyroMeasure[0] = sensorEvent.values[0];
-                    mGyroMeasure[1] = sensorEvent.values[1];
-                    mGyroMeasure[2] = sensorEvent.values[2];
                     if (isFileSaved) {
                         mFileStreamer.addRecord(timestamp, "gyro", 3, sensorEvent.values);
                     }
@@ -216,9 +206,6 @@ public class IMUSession implements SensorEventListener {
                     break;
 
                 case Sensor.TYPE_MAGNETIC_FIELD:
-                    mMagnetMeasure[0] = sensorEvent.values[0];
-                    mMagnetMeasure[1] = sensorEvent.values[1];
-                    mMagnetMeasure[2] = sensorEvent.values[2];
                     if (isFileSaved) {
                         mFileStreamer.addRecord(timestamp, "magnet", 3, sensorEvent.values);
                     }
@@ -283,18 +270,6 @@ public class IMUSession implements SensorEventListener {
     // getter and setter
     public boolean isRecording() {
         return mIsRecording.get();
-    }
-
-    public float[] getAcceMeasure() {
-        return mAcceMeasure;
-    }
-
-    public float[] getGyroMeasure() {
-        return mGyroMeasure;
-    }
-
-    public float[] getMagnetMeasure() {
-        return mMagnetMeasure;
     }
 
     public float[] getAcceBias() {

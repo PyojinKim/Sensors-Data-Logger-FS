@@ -18,9 +18,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class WifiSession implements Runnable {
-    public interface WifiScannerCallback {
-        void displayWifiScanMeasurements(final int currentApNums, final float currentScanInterval, final String nameSSID, final int RSSI);
-    }
 
     // properties
     private final static String LOG_TAG = WifiSession.class.getName();
