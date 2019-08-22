@@ -5,7 +5,6 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -21,7 +20,6 @@ import androidx.core.app.NotificationCompat;
 
 import java.io.IOException;
 import java.util.Locale;
-import java.util.Timer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ForegroundService extends Service {
@@ -42,9 +40,6 @@ public class ForegroundService extends Service {
 
     private Handler mHandler = new Handler();
     private AtomicBoolean mIsRecording = new AtomicBoolean(false);
-
-    private Timer mInterfaceTimer = new Timer();
-    private int mSecondCounter = 0;
 
 
     // Android service lifecycle states
