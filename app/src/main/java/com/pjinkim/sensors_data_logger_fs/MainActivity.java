@@ -23,10 +23,11 @@ public class MainActivity extends AppCompatActivity {
             Manifest.permission.ACCESS_WIFI_STATE,
             Manifest.permission.CHANGE_WIFI_STATE,
             Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.ACCESS_FINE_LOCATION
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.VIBRATE
     };
 
-    Button btnStartService, btnStopService;
+    private Button mStartServiceButton, mStopServiceButton;
 
 
     // Android activity lifecycle states
@@ -35,24 +36,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //
-        btnStartService = (Button) findViewById(R.id.buttonStartService);
-        btnStopService = (Button) findViewById(R.id.buttonStopService);
-
-        btnStartService.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startService();
-            }
-        });
-
-
-        btnStopService.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                stopService();
-            }
-        });
+        // initialize screen labels and buttons
+        initializeViews();
     }
 
 
@@ -72,16 +57,17 @@ public class MainActivity extends AppCompatActivity {
 
 
     // methods
-    public void startService() {
+    public void startService(View view) {
         Intent serviceIntent = new Intent(this, ForegroundService.class);
-        serviceIntent.putExtra("inputExtra", "Foreground Service Example in Android");
+        serviceIntent.setAction(ForegroundService.ACTION_START_FOREGROUND_SERVICE);
         ContextCompat.startForegroundService(this, serviceIntent);
     }
 
 
-    public void stopService() {
+    public void stopService(View view) {
         Intent serviceIntent = new Intent(this, ForegroundService.class);
-        stopService(serviceIntent);
+        serviceIntent.setAction(ForegroundService.ACTION_STOP_FOREGROUND_SERVICE);
+        startService(serviceIntent);
     }
 
 
@@ -94,5 +80,12 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         return true;
+    }
+
+
+    private void initializeViews() {
+
+        mStartServiceButton = (Button) findViewById(R.id.button_start_service);
+        mStopServiceButton = (Button) findViewById(R.id.button_stop_service);
     }
 }
