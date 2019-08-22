@@ -22,7 +22,7 @@ public class WifiSession implements Runnable {
     // properties
     private final static String LOG_TAG = WifiSession.class.getName();
 
-    private final static int DEFAULT_INTERVAL = 1000;
+    private final static int DEFAULT_INTERVAL = 5000; // milli second
     private int mScanInterval = DEFAULT_INTERVAL;
 
     private ForegroundService mContext;
@@ -41,13 +41,12 @@ public class WifiSession implements Runnable {
             if (!mIsRunning.get()) {
                 return;
             }
-            mWifiManager.startScan();
-            List<ScanResult> results = mWifiManager.getScanResults();
-            Log.i(LOG_TAG, "onReceive: Scan result received. Number of AP: " + String.valueOf(results.size()));
 
             // save the wifi scan results to text file
-            if (mIsWritingFile.get()) {
+            boolean success = intent.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, false);
+            if ((success) && (mIsWritingFile.get())) {
                 try {
+                    List<ScanResult> results = mWifiManager.getScanResults();
                     mFileStreamer.addWifiRecord(results);
                 } catch (IOException | KeyException e) {
                     Log.e(LOG_TAG, "onReceive: Cannot add the scan results to file");
@@ -81,7 +80,9 @@ public class WifiSession implements Runnable {
 
         // initialize text file stream
         mIsRunning.set(true);
-        mContext.registerReceiver(mScanReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
+        mContext.registerReceiver(mScanReceiver, intentFilter);
         if (streamFolder != null) {
             try {
                 mFileStreamer = new WifiResultStreamer(mContext, streamFolder);
@@ -164,7 +165,7 @@ public class WifiSession implements Runnable {
                 stringBuilder.append(results.size());
                 stringBuilder.append('\n');
                 for (ScanResult eachResult : results) {
-                    stringBuilder.append(eachResult.timestamp);
+                    stringBuilder.append(eachResult.timestamp * 1000); // micro sec to nano sec
                     stringBuilder.append('\t');
                     stringBuilder.append(eachResult.BSSID);
                     stringBuilder.append('\t');
