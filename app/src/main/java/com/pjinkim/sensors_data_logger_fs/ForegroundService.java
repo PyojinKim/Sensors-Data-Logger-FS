@@ -7,6 +7,8 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Handler;
@@ -67,22 +69,22 @@ public class ForegroundService extends Service {
             switch (action) {
                 case ACTION_START_FOREGROUND_SERVICE:
                     startForegroundService();
-                    Toast.makeText(this, "Foreground service now starts.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "Foreground service now starts!", Toast.LENGTH_LONG).show();
                     break;
 
                 case ACTION_STOP_FOREGROUND_SERVICE:
                     stopForegroundService();
-                    Toast.makeText(this, "Foreground service stops.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "Foreground service stops!", Toast.LENGTH_LONG).show();
                     break;
 
                 case ACTION_START_RECORDING:
                     startRecording();
-                    Toast.makeText(this, "You click Record button.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "You click Record button!", Toast.LENGTH_LONG).show();
                     break;
 
                 case ACTION_STOP_RECORDING:
                     stopRecording();
-                    Toast.makeText(this, "You click Stop button.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "You click Stop button!", Toast.LENGTH_LONG).show();
                     break;
             }
         }
@@ -117,10 +119,12 @@ public class ForegroundService extends Service {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID);
 
         // define notification style and icon
-        builder.setContentTitle("Sensors Data Logger in FS");
-        builder.setContentText("Please click RECORD button to save IMU/WiFi data.");
+        builder.setSmallIcon(R.drawable.app_small_icon);
+        Bitmap largeIconBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.app_large_icon);
+        builder.setLargeIcon(largeIconBitmap);
         builder.setWhen(System.currentTimeMillis());
-        builder.setSmallIcon(R.mipmap.ic_launcher);
+        builder.setContentTitle("Sensors Data Logger in FS");
+        builder.setContentText("Click RECORD button to save IMU/WiFi data.");
         builder.setDefaults(Notification.DEFAULT_ALL);
         builder.setPriority(NotificationCompat.PRIORITY_MAX);
         builder.setFullScreenIntent(pendingIntent, true);
