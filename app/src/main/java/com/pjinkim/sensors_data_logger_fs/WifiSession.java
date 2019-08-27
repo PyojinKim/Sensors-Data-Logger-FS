@@ -181,7 +181,6 @@ public class WifiSession implements Runnable {
 
             // execute the block with only one thread
             synchronized (this) {
-                mWriter.write("-1");
                 mWriter.flush();
                 mWriter.close();
             }
