@@ -66,7 +66,7 @@ public class IMUSession implements SensorEventListener {
     // methods
     public void registerSensors() {
         for (Sensor eachSensor : mSensors.values()) {
-            mSensorManager.registerListener(this, eachSensor, 5000);
+            mSensorManager.registerListener(this, eachSensor, 10000);
         }
     }
 

@@ -5,6 +5,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -12,6 +13,7 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -40,6 +42,7 @@ public class ForegroundService extends Service {
 
     private Handler mHandler = new Handler();
     private AtomicBoolean mIsRecording = new AtomicBoolean(false);
+    private PowerManager.WakeLock mWakeLock;
 
 
     // Android service lifecycle states
@@ -51,6 +54,11 @@ public class ForegroundService extends Service {
         mIMUSession = new IMUSession(this);
         mWifiSession = new WifiSession(this);
         mBatterySession = new BatterySession(this);
+
+        // battery power setting
+        PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "sensors_data_logger:wakelocktag");
+        mWakeLock.acquire();
     }
 
 
@@ -92,6 +100,11 @@ public class ForegroundService extends Service {
 
         // notify IMU recording foreground service done
         Toast.makeText(this, "Service Done!", Toast.LENGTH_SHORT).show();
+
+        // release and unregister sensors
+        if (mWakeLock.isHeld()) {
+            mWakeLock.release();
+        }
         mIMUSession.unregisterSensors();
         super.onDestroy();
     }
