@@ -701,27 +701,30 @@ set(gcf,'Units','pixels','Position',[100 200 1800 900]);  % modify figure
 % parsing battery text
 textFileDir = 'battery.txt';
 textBatteryData = importdata(textFileDir, delimiter, headerlinesIn);
-batteryTime = textBatteryData.data(:,1).';
-batteryTime = (batteryTime - batteryTime(1)) ./ nanoSecondToSecond;
+batteryTimeSec = textBatteryData.data(:,1).';
+batteryTimeSec = (batteryTimeSec - batteryTimeSec(1)) ./ nanoSecondToSecond;
+batteryTimeHour = batteryTimeSec / (60 * 60);
 batteryData = textBatteryData.data(:,2).';
 
-% plot battery
+% plot battery life versus time
+batteryPerHour = (batteryData(1) - batteryData(end)) / (batteryTimeHour(end) - batteryTimeHour(1));
 figure;
-plot(batteryTime, batteryData, 'm'); hold on; grid on; axis tight;
+plot(batteryTimeHour, batteryData, 'm'); hold on; grid on; axis tight;
 set(gcf,'color','w'); hold off;
-axis([min(batteryTime) max(batteryTime) min(batteryData) max(batteryData)]);
+axis([min(batteryTimeHour) max(batteryTimeHour) min(batteryData) max(batteryData)]);
 set(get(gcf,'CurrentAxes'),'FontName','Times New Roman','FontSize',17);
-xlabel('Time [sec]','FontName','Times New Roman','FontSize',17);
+xlabel('Time [hour]','FontName','Times New Roman','FontSize',17);
 ylabel('Battery [%]','FontName','Times New Roman','FontSize',17);
+title(['Battery Consumption Per Hour: ', num2str(batteryPerHour), ' %/h'],'FontName','Times New Roman','FontSize',17);
 set(gcf,'Units','pixels','Position',[100 200 1800 900]);  % modify figure
 
 % plot battery update rate
-timeDifference = diff(batteryTime);
+timeDifference = diff(batteryTimeSec);
 meanUpdateRate = (1/mean(timeDifference));
 figure;
-plot(batteryTime(2:end), timeDifference, 'm'); hold on; grid on; axis tight;
+plot(batteryTimeSec(2:end), timeDifference, 'm'); hold on; grid on; axis tight;
 set(gcf,'color','w'); hold off;
-axis([min(batteryTime) max(batteryTime) min(timeDifference) max(timeDifference)]);
+axis([min(batteryTimeSec) max(batteryTimeSec) min(timeDifference) max(timeDifference)]);
 set(get(gcf,'CurrentAxes'),'FontName','Times New Roman','FontSize',17);
 xlabel('Time [sec]','FontName','Times New Roman','FontSize',17);
 ylabel('Time Difference [sec]','FontName','Times New Roman','FontSize',17);
