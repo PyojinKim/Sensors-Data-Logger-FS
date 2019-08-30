@@ -1,4 +1,19 @@
 
+% play 3-DoF device orientation
+figure(10);
+L = 1; % coordinate axis length
+A = [0 0 0 1; L 0 0 1; 0 0 0 1; 0 L 0 1; 0 0 0 1; 0 0 L 1].';
+for k = 1:5:numData
+    figure(10); cla;
+    plot_inertial_frame(0.5); hold on; grid on; axis equal;
+    T_gb = [R_gb(:,:,k), ones(3,1);
+        zeros(1,3), 1];
+    B = T_gb * A;
+    plot3(B(1,1:2),B(2,1:2),B(3,1:2),'-r','LineWidth',1);   % x: red
+    plot3(B(1,3:4),B(2,3:4),B(3,3:4),'-g','LineWidth',1);  % y: green
+    plot3(B(1,5:6),B(2,5:6),B(3,5:6),'-b','LineWidth',1);  % z: blue
+    refresh; pause(0.01); k
+end
 
 %% unbiased vs raw rotation rate comparison
 
