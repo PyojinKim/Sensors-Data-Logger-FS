@@ -16,6 +16,8 @@ out/
 # Folders
 Visualization/IMU_100Hz_WIFI_OFF
 Visualization/IMU_100Hz_WIFI_ON
+Visualization/IMU_50Hz_WIFI_OFF
+Visualization/IMU_50Hz_WIFI_ON
 Visualization/*.txt
 
 # Gradle files
