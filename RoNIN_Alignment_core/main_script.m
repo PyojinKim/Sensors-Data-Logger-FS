@@ -45,27 +45,45 @@ if (toVisualize)
     % create figure
     h = figure(10);
     set(h,'Color',[1 1 1]);
-    set(h,'Units','pixels','Position',[85 150 1800 900]);
+    set(h,'Units','pixels','Position',[60 150 1850 900]);
     ha1 = axes('Position',[0.02,0.55 , 0.3,0.4]);
     %axis off;
     ha2 = axes('Position',[0.35,0.55 , 0.3,0.4]);
     %axis off;
     ha3 = axes('Position',[0.68,0.55 , 0.3,0.4]);
     ha4 = axes('Position',[0.02,0.05 , 0.3,0.4]);
-    % axis off;
+    %axis off;
     ha5 = axes('Position',[0.35,0.05 , 0.3,0.4]);
     ha6 = axes('Position',[0.68,0.05 , 0.3,0.4]);
     grid on; hold on;
 end
 
-for k = 517000:100:size(deviceRoninTrajectory,2)
+for k = 517000:50:size(deviceRoninTrajectory,2)
+    
+    
+    currentTime = deviceRoninTime(k);
+    
+    
+    [a,b] = min(abs(currentTime - [deviceWiFiScanResults(:).timestamp]))
+    
+    
+    
+    
     %% update RoNIN 2D trajectory
     
-    axes(ha1); cla;
+    axes(ha6); cla;
+    % draw moving trajectory
     p_gb_RoNIN = deviceRoninTrajectory(1:2,1:k);
     plot(p_gb_RoNIN(1,:), p_gb_RoNIN(2,:), 'm', 'LineWidth', 2); hold on; grid on; axis equal;
-    xlabel('x [m]','fontsize',12); ylabel('y [m]','fontsize',12); hold off;
+    xlabel('X [m]','fontsize',10); ylabel('Y [m]','fontsize',10); hold off;
+    title('RoNIN 2D estimated trajectory');
     refresh; pause(0.01); k
+    
+    
+    
+    
+    
+    
     
     %% update WiFi scan results
     
