@@ -7,7 +7,7 @@ tline = fgetl(textWifiFileID);
 
 % construct wifi scan results
 nanoSecondToSecond = 1000000000;
-deviceWiFiScanResults = struct('timestamp', cell(1, 10000), 'numberOfAPs', cell(1, 10000), 'eachWifiAPInfo', cell(1, 10000));
+deviceWiFiScanResults = struct('timestamp', cell(1,10000), 'numberOfAPs', cell(1,10000), 'eachWifiAPInfo', cell(1,10000));
 numberOfWifiScan = 0;
 while (true)
     
@@ -22,7 +22,7 @@ while (true)
     end
     
     % save each AP information per wifi scan
-    eachWifiAPInfo = struct('timestamp', cell(1, numberOfAPs), 'BSSID', cell(1, numberOfAPs), 'RSSI', cell(1, numberOfAPs));
+    eachWifiAPInfo = struct('timestamp', cell(1,numberOfAPs), 'BSSID', cell(1,numberOfAPs), 'RSSI', cell(1,numberOfAPs));
     for k = 1:numberOfAPs
         
         % read each AP information
