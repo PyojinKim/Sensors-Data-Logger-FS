@@ -1,0 +1,1 @@
+[deviceMagnetTime, deviceMagnetResults] = loadMagnetResults( '20190830040751R_pjinkim_magnet.txt', deviceRoninTime, deviceReferenceTime);
