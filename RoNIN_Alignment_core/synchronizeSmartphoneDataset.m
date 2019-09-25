@@ -1,4 +1,4 @@
-function [deviceDataset] = synchronizeSmartphoneDataset(rawDeviceDataset)
+function [deviceDataset] = synchronizeSmartphoneDataset(rawDeviceDataset, kStartMagnet, kEndMagnet)
 % Project:    RoNIN Alignment with Multiple Sensors
 % Function:  synchronizeSmartphoneDataset
 %
@@ -27,7 +27,7 @@ function [deviceDataset] = synchronizeSmartphoneDataset(rawDeviceDataset)
 %
 
 % magnet reference time and data
-syncTimestamp = rawDeviceDataset.magnet.timestamp;
+syncTimestamp = rawDeviceDataset.magnet.timestamp(kStartMagnet:kEndMagnet);
 numMagnetData = size(syncTimestamp,2);
 
 % synchronize & compensate magnetic field w.r.t. global frame
@@ -55,13 +55,17 @@ for k = 1:numMagnetData
     end
     
     % calibrated magnetic field
-    syncMagnetField(:,k) = R_gb * rawDeviceDataset.magnet.vectorField(:,k);
+    [timeDifference, magnetIndex] = min(abs(currentTime - rawDeviceDataset.magnet.timestamp));
+    if (timeDifference < timeDifferenceThreshold)
+        syncMagnetField(:,k) = R_gb * rawDeviceDataset.magnet.vectorField(:,magnetIndex);
+    end
     
     % raw magnetic field
     [timeDifference, rawMagnetIndex] = min(abs(currentTime - rawDeviceDataset.magnet_uncalib.timestamp));
     if (timeDifference < timeDifferenceThreshold)
         syncRawMagnetField(:,k) = R_gb * rawDeviceDataset.magnet_uncalib.vectorField(:,rawMagnetIndex);
     end
+    fprintf('Current Status: %d / %d \n', k, numMagnetData);
 end
 
 % save the synchronized & compensated results

@@ -27,75 +27,80 @@ setupParams_Smartphone_Dataset;
 
 % load & synchronize smartphone dataset data (RoNIN / Magnet / WiFi)
 rawDeviceDataset = loadRawSmartphoneDataset(datasetPath);
-deviceDataset = synchronizeSmartphoneDataset(rawDeviceDataset);
+deviceDataset = synchronizeSmartphoneDataset(rawDeviceDataset, kStartMagnet, kEndMagnet);
+
+% various variables from deviceDataset
+numData = size(deviceDataset.syncTimestamp,2);
+syncTimestamp = deviceDataset.syncTimestamp;
+syncRoninPose = [deviceDataset.syncRoninPose; zeros(1,numData)];
+syncDeviceOrientation = deviceDataset.syncDeviceOrientation;
+syncMagnetField = deviceDataset.syncMagnetField;
 
 
-%% load ground truth data
+%% plot RoNIN 2D trajectory with magnetic field vectors
 
+% plot RoNIN 2D trajectory
+figure(11);
+h_ronin = plot3(syncRoninPose(1,:), syncRoninPose(2,:), syncRoninPose(3,:),'m','LineWidth',2); hold on; grid on; axis equal;
 
-% ground truth trajectory in ICL NUIM dataset
-R_gc_true = zeros(3,3,M);
-p_gc_true = zeros(3,M);
-T_gc_true = cell(1,M);
-for k = 1:M
-    % camera body frame
-    R_gc_true(:,:,k) = q2r(ICLNUIMdataset.vicon.q_gc_Sync(:,k));
-    p_gc_true(:,k) = ICLNUIMdataset.vicon.p_gc_Sync(:,k);
-    T_gc_true{k} = [ R_gc_true(:,:,k), p_gc_true(:,k);
-        zeros(1,3),           1; ];
+% plot magnetic field vectors
+for k = 1:50:numData
+    currentPosition = syncRoninPose(:,k);
+    currentMagnet = syncMagnetField(:,k);
+    currentMagnet = currentMagnet / norm(currentMagnet);
+    h_magnet = plot_magnetic_field_vector(currentPosition, currentMagnet, 'b', 2.0);
 end
-if (toVisualize)
-    figure; hold on; axis equal;
-    L = 0.1; % coordinate axis length
-    A = [0 0 0 1; L 0 0 1; 0 0 0 1; 0 L 0 1; 0 0 0 1; 0 0 L 1]';
-    
-    for k = 1:10:M
-        T = T_gc_true{k};
-        B = T * A;
-        plot3(B(1,1:2),B(2,1:2),B(3,1:2),'-r','LineWidth',1); % x: red
-        plot3(B(1,3:4),B(2,3:4),B(3,3:4),'-g','LineWidth',1); % y: green
-        plot3(B(1,5:6),B(2,5:6),B(3,5:6),'-b','LineWidth',1); % z: blue
-    end
-    plot3(p_gc_true(1,:),p_gc_true(2,:),p_gc_true(3,:),'k','LineWidth',2);
-    
-    title('ground truth trajectory of cam0 frame')
-    xlabel('x'); ylabel('y'); zlabel('z');
-end
+plot_inertial_frame(5.0); legend([h_ronin h_magnet],{'RoNIN', 'Magnetic Field'}); view(34,29);
+xlabel('x [m]','fontsize',12); ylabel('y [m]','fontsize',12); zlabel('z [m]','fontsize',12); hold off;
 
 
+%% plot RoNIN 2D trajectory
 
-
-
-%%
-
-
-figure;
-plot(deviceRoninTrajectory(1,:), deviceRoninTrajectory(2,:),'m','LineWidth',2); hold on; grid on;
-legend('RoNIN'); axis equal;
-xlabel('x [m]','fontsize',12); ylabel('y [m]','fontsize',12); hold off;
-
+% plot RoNIN trajectory X-Y
 figure;
 subplot(2,1,1);
-plot(deviceRoninTime, deviceRoninTrajectory(1,:), 'm'); hold on; grid on; axis tight;
+plot(syncTimestamp, syncRoninPose(1,:), 'm'); hold on; grid on; axis tight;
 set(gcf,'color','w'); hold off;
-axis([min(deviceRoninTime) max(deviceRoninTime) min(deviceRoninTrajectory(1,:)) max(deviceRoninTrajectory(1,:))]);
+axis([min(syncTimestamp) max(syncTimestamp) min(syncRoninPose(1,:)) max(syncRoninPose(1,:))]);
 set(get(gcf,'CurrentAxes'),'FontName','Times New Roman','FontSize',17);
 xlabel('Time [sec]','FontName','Times New Roman','FontSize',17);
 ylabel('X [m]','FontName','Times New Roman','FontSize',17);
 subplot(2,1,2);
-plot(deviceRoninTime, deviceRoninTrajectory(2,:), 'm'); hold on; grid on; axis tight;
+plot(syncTimestamp, syncRoninPose(2,:), 'm'); hold on; grid on; axis tight;
 set(gcf,'color','w'); hold off;
-axis([min(deviceRoninTime) max(deviceRoninTime) min(deviceRoninTrajectory(2,:)) max(deviceRoninTrajectory(2,:))]);
+axis([min(syncTimestamp) max(syncTimestamp) min(syncRoninPose(2,:)) max(syncRoninPose(2,:))]);
 set(get(gcf,'CurrentAxes'),'FontName','Times New Roman','FontSize',17);
 xlabel('Time [sec]','FontName','Times New Roman','FontSize',17);
 ylabel('Y [m]','FontName','Times New Roman','FontSize',17);
-set(gcf,'Units','pixels','Position',[100 200 1800 900]);  % modify figure
+set(gcf,'Units','pixels','Position',[100 50 1000 900]);  % modify figure
 
 
-%%
+%% plot calibrated magnetic field in global (reference) frame
 
-% parsing device WiFi scan results
-[deviceWiFiScanResults] = loadWiFiScanResults('20190830040751R_pjinkim_wifi.txt', deviceReferenceTime);
+% plot calibrated magnetic field X-Y-Z
+figure;
+subplot(3,1,1);
+plot(syncTimestamp, syncMagnetField(1,:), 'm'); hold on; grid on; axis tight;
+set(gcf,'color','w'); hold off;
+axis([min(syncTimestamp) max(syncTimestamp) min(syncMagnetField(1,:)) max(syncMagnetField(1,:))]);
+set(get(gcf,'CurrentAxes'),'FontName','Times New Roman','FontSize',17);
+xlabel('Time [sec]','FontName','Times New Roman','FontSize',17);
+ylabel('X [•ÏT]','FontName','Times New Roman','FontSize',17);
+subplot(3,1,2);
+plot(syncTimestamp, syncMagnetField(2,:), 'm'); hold on; grid on; axis tight;
+set(gcf,'color','w'); hold off;
+axis([min(syncTimestamp) max(syncTimestamp) min(syncMagnetField(2,:)) max(syncMagnetField(2,:))]);
+set(get(gcf,'CurrentAxes'),'FontName','Times New Roman','FontSize',17);
+xlabel('Time [sec]','FontName','Times New Roman','FontSize',17);
+ylabel('Y [•ÏT]','FontName','Times New Roman','FontSize',17);
+subplot(3,1,3);
+plot(syncTimestamp, syncMagnetField(3,:), 'm'); hold on; grid on; axis tight;
+set(gcf,'color','w'); hold off;
+axis([min(syncTimestamp) max(syncTimestamp) min(syncMagnetField(3,:)) max(syncMagnetField(3,:))]);
+set(get(gcf,'CurrentAxes'),'FontName','Times New Roman','FontSize',17);
+xlabel('Time [sec]','FontName','Times New Roman','FontSize',17);
+ylabel('Z [•ÏT]','FontName','Times New Roman','FontSize',17);
+set(gcf,'Units','pixels','Position',[100 50 1000 900]);  % modify figure
 
 
 %%

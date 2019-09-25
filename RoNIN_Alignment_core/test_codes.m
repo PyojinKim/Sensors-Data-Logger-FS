@@ -1,4 +1,53 @@
 
+%% videos for 'plot RoNIN 2D trajectory with magnetic field vectors'
+
+figure(10);
+for k = 1:50:numData
+    figure(10); cla;
+    
+    % draw RoNIN trajectory
+    plot3(syncRoninPose(1,1:k), syncRoninPose(2,1:k), syncRoninPose(3,1:k), 'm', 'LineWidth', 2); hold on; grid on; axis equal;
+    
+    % draw magnetic field vectors
+    currentPosition = syncRoninPose(:,k);
+    currentMagnet = syncMagnetField(:,k);
+    currentMagnet = currentMagnet / norm(currentMagnet);
+    plot_magnetic_field_vector(currentPosition, currentMagnet, 'b', 2.0);
+    
+    % draw body (sensor) frame
+    plot_inertial_frame(10); view(39, 32);
+    R_gb = syncDeviceOrientation(:,:,k);
+    p_gb = syncRoninPose(:,k);
+    plot_sensor_frame(R_gb, p_gb, 10); hold off;
+    refresh; pause(0.01); k
+end
+
+
+%%
+
+
+deviceMagnetData = rawDeviceDataset.magnet.vectorField;
+
+% plot calibrated magnetic field X-Y-Z
+figure;
+subplot(3,1,1);
+plot(deviceMagnetData(1,:), 'm'); hold on; grid on; axis tight;
+set(gcf,'color','w'); hold off;
+set(get(gcf,'CurrentAxes'),'FontName','Times New Roman','FontSize',17);
+ylabel('X [•ÏT]','FontName','Times New Roman','FontSize',17);
+subplot(3,1,2);
+plot(deviceMagnetData(2,:), 'm'); hold on; grid on; axis tight;
+set(gcf,'color','w'); hold off;
+set(get(gcf,'CurrentAxes'),'FontName','Times New Roman','FontSize',17);
+ylabel('Y [•ÏT]','FontName','Times New Roman','FontSize',17);
+subplot(3,1,3);
+plot(deviceMagnetData(3,:), 'm'); hold on; grid on; axis tight;
+set(gcf,'color','w'); hold off;
+set(get(gcf,'CurrentAxes'),'FontName','Times New Roman','FontSize',17);
+ylabel('Z [•ÏT]','FontName','Times New Roman','FontSize',17);
+set(gcf,'Units','pixels','Position',[100 50 1800 900]);  % modify figure
+
+
 
 
 
@@ -17,6 +66,14 @@ xlabel('Time [sec]','FontName','Times New Roman','FontSize',17);
 ylabel('Time Difference [sec]','FontName','Times New Roman','FontSize',17);
 title(['Mean Update Rate: ', num2str(meanUpdateRate), ' Hz'],'FontName','Times New Roman','FontSize',17);
 set(gcf,'Units','pixels','Position',[100 200 1800 900]);  % modify figure
+
+
+
+
+
+deviceRoninTime = rawDeviceDataset.RoNIN.timestamp;
+deviceRoninTrajectory = rawDeviceDataset.RoNIN.trajectory;
+
 
 
 
@@ -66,22 +123,22 @@ set(gcf,'color','w'); hold off;
 axis([min(partialMagnetTime) max(partialMagnetTime) min(partialMagnetData(1,:)) max(partialMagnetData(1,:))]);
 set(get(gcf,'CurrentAxes'),'FontName','Times New Roman','FontSize',17);
 xlabel('Time [sec]','FontName','Times New Roman','FontSize',17);
-ylabel('X [ŒºT]','FontName','Times New Roman','FontSize',17);
+ylabel('X [•ÏT]','FontName','Times New Roman','FontSize',17);
 subplot(3,1,2);
 plot(partialMagnetTime, partialMagnetData(2,:), 'm'); hold on; grid on; axis tight;
 set(gcf,'color','w'); hold off;
 axis([min(partialMagnetTime) max(partialMagnetTime) min(partialMagnetData(2,:)) max(partialMagnetData(2,:))]);
 set(get(gcf,'CurrentAxes'),'FontName','Times New Roman','FontSize',17);
 xlabel('Time [sec]','FontName','Times New Roman','FontSize',17);
-ylabel('Y [ŒºT]','FontName','Times New Roman','FontSize',17);
+ylabel('Y [•ÏT]','FontName','Times New Roman','FontSize',17);
 subplot(3,1,3);
 plot(partialMagnetTime, partialMagnetData(3,:), 'm'); hold on; grid on; axis tight;
 set(gcf,'color','w'); hold off;
 axis([min(partialMagnetTime) max(partialMagnetTime) min(partialMagnetData(3,:)) max(partialMagnetData(3,:))]);
 set(get(gcf,'CurrentAxes'),'FontName','Times New Roman','FontSize',17);
 xlabel('Time [sec]','FontName','Times New Roman','FontSize',17);
-ylabel('Z [ŒºT]','FontName','Times New Roman','FontSize',17);
-set(gcf,'Units','pixels','Position',[100 200 1800 900]);  % modify figure
+ylabel('Z [•ÏT]','FontName','Times New Roman','FontSize',17);
+set(gcf,'Units','pixels','Position',[100 50 1800 900]);  % modify figure
 
 
 % WiFi data time synchronization
@@ -105,131 +162,5 @@ set(get(gcf,'CurrentAxes'),'FontName','Times New Roman','FontSize',17);
 xlabel('Time [sec]','FontName','Times New Roman','FontSize',17);
 ylabel('Number of APs','FontName','Times New Roman','FontSize',17);
 set(gcf,'Units','pixels','Position',[100 200 1800 300]);  % modify figure
-
-
-
-
-% plot the
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-%% common setting to read text files
-
-delimiter = ' ';
-headerlinesIn = 1;
-nanoSecondToSecond = 1000000000;
-
-
-%% 9) calibrated magnetic field
-
-% parsing calibrated magnetic field text
-textFileDir = '20190830040751R_pjinkim_magnet.txt';
-textMagnetData = importdata(textFileDir, delimiter, headerlinesIn);
-magnetTime = textMagnetData.data(:,1).';
-magnetTime = (magnetTime - magnetTime(1)) ./ nanoSecondToSecond;
-magnetData = textMagnetData.data(:,[2 3 4]).';
-
-% plot calibrated magnetic field X-Y-Z
-figure;
-subplot(3,1,1);
-plot(magnetTime, magnetData(1,:), 'm'); hold on; grid on; axis tight;
-set(gcf,'color','w'); hold off;
-axis([min(magnetTime) max(magnetTime) min(magnetData(1,:)) max(magnetData(1,:))]);
-set(get(gcf,'CurrentAxes'),'FontName','Times New Roman','FontSize',17);
-xlabel('Time [sec]','FontName','Times New Roman','FontSize',17);
-ylabel('X [microT]','FontName','Times New Roman','FontSize',17);
-subplot(3,1,2);
-plot(magnetTime, magnetData(2,:), 'm'); hold on; grid on; axis tight;
-set(gcf,'color','w'); hold off;
-axis([min(magnetTime) max(magnetTime) min(magnetData(2,:)) max(magnetData(2,:))]);
-set(get(gcf,'CurrentAxes'),'FontName','Times New Roman','FontSize',17);
-xlabel('Time [sec]','FontName','Times New Roman','FontSize',17);
-ylabel('Y [microT]','FontName','Times New Roman','FontSize',17);
-subplot(3,1,3);
-plot(magnetTime, magnetData(3,:), 'm'); hold on; grid on; axis tight;
-set(gcf,'color','w'); hold off;
-axis([min(magnetTime) max(magnetTime) min(magnetData(3,:)) max(magnetData(3,:))]);
-set(get(gcf,'CurrentAxes'),'FontName','Times New Roman','FontSize',17);
-xlabel('Time [sec]','FontName','Times New Roman','FontSize',17);
-ylabel('Z [microT]','FontName','Times New Roman','FontSize',17);
-set(gcf,'Units','pixels','Position',[100 200 1800 900]);  % modify figure
-
-% plot calibrated magnetic field update rate
-timeDifference = diff(magnetTime);
-meanUpdateRate = (1/mean(timeDifference));
-figure;
-plot(magnetTime(2:end), timeDifference, 'm'); hold on; grid on; axis tight;
-set(gcf,'color','w'); hold off;
-axis([min(magnetTime) max(magnetTime) min(timeDifference) max(timeDifference)]);
-set(get(gcf,'CurrentAxes'),'FontName','Times New Roman','FontSize',17);
-xlabel('Time [sec]','FontName','Times New Roman','FontSize',17);
-ylabel('Time Difference [sec]','FontName','Times New Roman','FontSize',17);
-title(['Mean Update Rate: ', num2str(meanUpdateRate), ' Hz'],'FontName','Times New Roman','FontSize',17);
-set(gcf,'Units','pixels','Position',[100 200 1800 900]);  % modify figure
-
-
-%% 10) raw magnetic field
-
-% parsing raw magnetic field text
-textFileDir = '20190830040751R_pjinkim_magnet_uncalib.txt';
-textRawMagnetData = importdata(textFileDir, delimiter, headerlinesIn);
-rawMagnetTime = textRawMagnetData.data(:,1).';
-rawMagnetTime = (rawMagnetTime - rawMagnetTime(1)) ./ nanoSecondToSecond;
-rawMagnetData = textRawMagnetData.data(:,[2 3 4]).';
-
-% plot raw magnetic field X-Y-Z
-figure;
-subplot(3,1,1);
-plot(rawMagnetTime, rawMagnetData(1,:), 'm'); hold on; grid on; axis tight;
-set(gcf,'color','w'); hold off;
-axis([min(rawMagnetTime) max(rawMagnetTime) min(rawMagnetData(1,:)) max(rawMagnetData(1,:))]);
-set(get(gcf,'CurrentAxes'),'FontName','Times New Roman','FontSize',17);
-xlabel('Time [sec]','FontName','Times New Roman','FontSize',17);
-ylabel('X [microT]','FontName','Times New Roman','FontSize',17);
-subplot(3,1,2);
-plot(rawMagnetTime, rawMagnetData(2,:), 'm'); hold on; grid on; axis tight;
-set(gcf,'color','w'); hold off;
-axis([min(rawMagnetTime) max(rawMagnetTime) min(rawMagnetData(2,:)) max(rawMagnetData(2,:))]);
-set(get(gcf,'CurrentAxes'),'FontName','Times New Roman','FontSize',17);
-xlabel('Time [sec]','FontName','Times New Roman','FontSize',17);
-ylabel('Y [microT]','FontName','Times New Roman','FontSize',17);
-subplot(3,1,3);
-plot(rawMagnetTime, rawMagnetData(3,:), 'm'); hold on; grid on; axis tight;
-set(gcf,'color','w'); hold off;
-axis([min(rawMagnetTime) max(rawMagnetTime) min(rawMagnetData(3,:)) max(rawMagnetData(3,:))]);
-set(get(gcf,'CurrentAxes'),'FontName','Times New Roman','FontSize',17);
-xlabel('Time [sec]','FontName','Times New Roman','FontSize',17);
-ylabel('Z [microT]','FontName','Times New Roman','FontSize',17);
-set(gcf,'Units','pixels','Position',[100 200 1800 900]);  % modify figure
-
-% plot raw magnetic field update rate
-timeDifference = diff(rawMagnetTime);
-meanUpdateRate = (1/mean(timeDifference));
-figure;
-plot(rawMagnetTime(2:end), timeDifference, 'm'); hold on; grid on; axis tight;
-set(gcf,'color','w'); hold off;
-axis([min(rawMagnetTime) max(rawMagnetTime) min(timeDifference) max(timeDifference)]);
-set(get(gcf,'CurrentAxes'),'FontName','Times New Roman','FontSize',17);
-xlabel('Time [sec]','FontName','Times New Roman','FontSize',17);
-ylabel('Time Difference [sec]','FontName','Times New Roman','FontSize',17);
-title(['Mean Update Rate: ', num2str(meanUpdateRate), ' Hz'],'FontName','Times New Roman','FontSize',17);
-set(gcf,'Units','pixels','Position',[100 200 1800 900]);  % modify figure
-
-
-
-
-
-
 
 
