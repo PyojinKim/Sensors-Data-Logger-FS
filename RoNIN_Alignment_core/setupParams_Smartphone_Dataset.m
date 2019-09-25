@@ -31,4 +31,10 @@ switch( expCase )
         M           = 1;        % number of images
         
         
+    case 5
+        datasetPath = 'G:/Smartphone_Dataset/1_Lifelong_Learning/Samsung_Galaxy_S9/20190918012252R_pjinkim';
+        
+        imInit      = 1;        % first image index, (1-based index)
+        M           = 1;        % number of images
+        
 end

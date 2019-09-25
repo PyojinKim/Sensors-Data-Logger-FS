@@ -1,6 +1,27 @@
 
 
 
+
+deviceWiFiTime = rawDeviceDataset.wifi.timestamp;
+
+
+% plot update rate of device orientation
+timeDifference = diff(deviceWiFiTime);
+meanUpdateRate = (1/mean(timeDifference));
+figure;
+plot(deviceWiFiTime(2:end), timeDifference, 'm'); hold on; grid on; axis tight;
+set(gcf,'color','w'); hold off;
+axis([min(deviceWiFiTime) max(deviceWiFiTime) min(timeDifference) max(timeDifference)]);
+set(get(gcf,'CurrentAxes'),'FontName','Times New Roman','FontSize',17);
+xlabel('Time [sec]','FontName','Times New Roman','FontSize',17);
+ylabel('Time Difference [sec]','FontName','Times New Roman','FontSize',17);
+title(['Mean Update Rate: ', num2str(meanUpdateRate), ' Hz'],'FontName','Times New Roman','FontSize',17);
+set(gcf,'Units','pixels','Position',[100 200 1800 900]);  % modify figure
+
+
+
+
+
 kStartRonin = 490160;
 kEndRonin = 593500;
 

@@ -25,13 +25,9 @@ toSave = 1;
 setupParams_Smartphone_Dataset;
 
 
-% load smartphone dataset data
+% load & synchronize smartphone dataset data (RoNIN / Magnet / WiFi)
 rawDeviceDataset = loadRawSmartphoneDataset(datasetPath);
-
-
-% time
-
-
+deviceDataset = synchronizeSmartphoneDataset(rawDeviceDataset);
 
 
 %% load ground truth data
