@@ -18,6 +18,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.security.KeyException;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class FLPSession {
@@ -36,7 +37,7 @@ public class FLPSession {
 
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private LocationRequest mLocationRequest;
-    private Location mLastLocation, mCurrentLocation;
+    private Location mCurrentLocation;
     private FLPResultStreamer mFileStreamer;
     private LocationCallback mLocationCallback = new LocationCallback() {
         @Override
@@ -47,14 +48,18 @@ public class FLPSession {
                 return;
             }
 
-            // request current locations from FLP
+            // save the current location to text file
             List<Location> locationList = locationResult.getLocations();
-            if (locationList.size() > 0) {
-
-                // the last location in the list is the newest one
-                Location location = locationList.get(locationList.size() - 1);
-                Log.d("MapsActivity", "mLocationCallback: " + location.getLatitude() + " / " + location.getLongitude());
-                mLastLocation = location;
+            if ((locationList.size() > 0) && (mIsWritingFile.get())) {
+                try {
+                    // the last location in the list is the newest one
+                    Location location = locationList.get(locationList.size() - 1);
+                    mFileStreamer.addFLPRecord(location);
+                    mCurrentLocation = location;
+                } catch (IOException | KeyException e) {
+                    Log.e(LOG_TAG, "onLocationResult: Cannot add the location result to file");
+                    e.printStackTrace();
+                }
             }
         }
     };
@@ -138,7 +143,7 @@ public class FLPSession {
 
 
         // methods
-        public void addFLPRecord(final List<Location> results) throws IOException, KeyException {
+        public void addFLPRecord(final Location location) throws IOException, KeyException {
 
             // execute the block with only one thread
             synchronized (this) {
@@ -150,9 +155,12 @@ public class FLPSession {
 
                 // record Fused Location Provider (FLP) information in text file
                 StringBuilder stringBuilder = new StringBuilder();
-
-
-
+                stringBuilder.append(location.getElapsedRealtimeNanos()); // nano seconds since boot
+                stringBuilder.append(String.format(Locale.US, " %.6f %.6f %.6f", location.getLatitude(), location.getLongitude(), location.getAccuracy()));
+                stringBuilder.append(String.format(Locale.US, " %.6f %.6f", location.getAltitude(), location.getVerticalAccuracyMeters()));
+                stringBuilder.append(String.format(Locale.US, " %.6f %.6f", location.getBearing(), location.getBearingAccuracyDegrees()));
+                stringBuilder.append(String.format(Locale.US, " %.6f %.6f", location.getSpeed(), location.getSpeedAccuracyMetersPerSecond()));
+                stringBuilder.append(" \n");
                 mWriter.write(stringBuilder.toString());
             }
         }
@@ -170,6 +178,10 @@ public class FLPSession {
 
 
     // getter and setter
+    public Location getCurrentLocation() {
+        return mCurrentLocation;
+    }
+
     public boolean isRunning() {
         return mIsRunning.get();
     }
