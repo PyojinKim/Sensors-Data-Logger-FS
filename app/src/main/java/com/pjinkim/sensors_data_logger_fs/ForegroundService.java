@@ -39,6 +39,7 @@ public class ForegroundService extends Service {
     private IMUSession mIMUSession;
     private WifiSession mWifiSession;
     private BatterySession mBatterySession;
+    private FLPSession mFLPSession;
 
     private Handler mHandler = new Handler();
     private AtomicBoolean mIsRecording = new AtomicBoolean(false);
@@ -54,6 +55,7 @@ public class ForegroundService extends Service {
         mIMUSession = new IMUSession(this);
         mWifiSession = new WifiSession(this);
         mBatterySession = new BatterySession(this);
+        mFLPSession = new FLPSession(this);
 
         // battery power setting
         PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
@@ -188,6 +190,7 @@ public class ForegroundService extends Service {
         mIMUSession.startSession(outputFolder);
         mWifiSession.startSession(outputFolder);
         mBatterySession.startSession(outputFolder);
+        mFLPSession.startSession(outputFolder);
         mIsRecording.set(true);
     }
 
@@ -201,6 +204,7 @@ public class ForegroundService extends Service {
                 mIMUSession.stopSession();
                 mWifiSession.stopSession();
                 mBatterySession.stopSession();
+                mFLPSession.stopSession();
                 mIsRecording.set(false);
             }
         });
