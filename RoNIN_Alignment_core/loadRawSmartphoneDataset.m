@@ -38,7 +38,7 @@ nanoSecondToSecond = 1000000000;
 % import text file
 textRoninData = importdata([datasetPath '/ronin.txt'], delimiter, headerlinesIn);
 deviceRoninTime = textRoninData.data(:,1).';
-deviceRoninTrajectory = textRoninData.data(:,[2:3]).';
+deviceRoninTrajectory = -textRoninData.data(:,[2:3]).';
 
 % define device reference time
 deviceReferenceTime = deviceRoninTime(1);
@@ -126,14 +126,24 @@ rawDeviceDataset.wifi.eachAPsInfo = deviceWiFiEachAPInfo;
 textFLPData = importdata([datasetPath '/FLP.txt'], delimiter, headerlinesIn);
 deviceFLPTime = textFLPData.data(:,1).';
 deviceFLPTime = (deviceFLPTime - deviceReferenceTimeInNanoSecond) ./ nanoSecondToSecond;
-deviceFLPHorizontalPosition = textFLPData.data(:,[2 3 4]).';
+deviceFLPHorizontalPositionDegree = textFLPData.data(:,[2 3 4]).';
 deviceFLPVerticalPosition = textFLPData.data(:,[5 6]).';
 deviceFLPBearingAngle = textFLPData.data(:,[7 8]).';
 deviceFLPSpeed= textFLPData.data(:,[9 10]).';
 
+% convert lat/lon coordinates (deg) to mercator coordinates (m)
+scale = latToScale(deviceFLPHorizontalPositionDegree(1,1));
+Latitude = deviceFLPHorizontalPositionDegree(1,:);
+Longitude = deviceFLPHorizontalPositionDegree(2,:);
+[X,Y] = latlonToMercator(Latitude, Longitude, scale);
+X = X - X(1);
+Y = Y - Y(1);
+deviceFLPHorizontalPositionMeter = [X;Y];
+
 % save the results
 rawDeviceDataset.FLP.timestamp = deviceFLPTime;
-rawDeviceDataset.FLP.horizontalPosition = deviceFLPHorizontalPosition;
+rawDeviceDataset.FLP.horizontalPositionDegree = deviceFLPHorizontalPositionDegree;
+rawDeviceDataset.FLP.horizontalPositionMeter = deviceFLPHorizontalPositionMeter;
 rawDeviceDataset.FLP.verticalPosition = deviceFLPVerticalPosition;
 rawDeviceDataset.FLP.bearingAngle = deviceFLPBearingAngle;
 rawDeviceDataset.FLP.speed = deviceFLPSpeed;

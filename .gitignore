@@ -21,6 +21,7 @@ Visualization/IMU_50Hz_WIFI_ON
 Visualization/*.txt
 Visualization/*.mat
 RoNIN_Alignment_core/*.txt
+RoNIN_Alignment_core/*.mat
 
 # Gradle files
 .gradle/

@@ -4,44 +4,9 @@
 switch( expCase )
     
     case 1
-        datasetPath = 'G:/Smartphone_Dataset/1_Lifelong_Learning/Samsung_Galaxy_S9/20190830040751R_pjinkim';
-        
-        kStartMagnet = 256615;
-        kEndMagnet = 281064;
-        
+        datasetPath = 'G:/Smartphone_Dataset/1_Lifelong_Learning/Samsung_Galaxy_S9/20191001033504R_pjinkim';
         
     case 2
-        datasetPath = 'G:/Smartphone_Dataset/1_Lifelong_Learning/Samsung_Galaxy_S9/20190904030416R_pjinkim';
-        
-        imInit      = 1;      % first image index, (1-based index)
-        M           = 1;      % number of images
-        
-        
-    case 3
-        datasetPath = 'G:/Smartphone_Dataset/1_Lifelong_Learning/Samsung_Galaxy_S9/20190905031217R_pjinkim';
-        
-        imInit      = 1;      % first image index, (1-based index)
-        M           = 1;      % number of images
-        
-        
-    case 4
-        datasetPath = 'G:/Smartphone_Dataset/1_Lifelong_Learning/Samsung_Galaxy_S9/20190906101032R_pjinkim';
-        
-        imInit      = 1;        % first image index, (1-based index)
-        M           = 1;        % number of images
-        
-        
-    case 5
-        datasetPath = 'G:/Smartphone_Dataset/1_Lifelong_Learning/Samsung_Galaxy_S9/20190918012252R_pjinkim';
-        
-        imInit      = 1;        % first image index, (1-based index)
-        M           = 1;        % number of images
-        
-        
-    case 6
         datasetPath = 'G:/Smartphone_Dataset/1_Lifelong_Learning/Google_Pixel_2_XL/20190930035631R_pjinkim';
-        
-        imInit      = 1;        % first image index, (1-based index)
-        M           = 1;        % number of images
         
 end

@@ -9,7 +9,7 @@ dbstop if error;
 
 % choose the experiment case
 % Smartphone dataset (1~XX)
-expCase = 6;
+expCase = 1;
 
 % are figures drawn?
 % 1 : yes, draw figures to see current status
@@ -30,13 +30,13 @@ rawDeviceDataset = loadRawSmartphoneDataset(datasetPath);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-kStartFLP = 1000;
-kEndFLP = 1500;
+kStartFLP = 1;
+kEndFLP = 50;
 startTime = rawDeviceDataset.FLP.timestamp(kStartFLP);
 endTime = rawDeviceDataset.FLP.timestamp(kEndFLP);
 
-Longitude = rawDeviceDataset.FLP.horizontalPosition(2,kStartFLP:kEndFLP);
-Latitude = rawDeviceDataset.FLP.horizontalPosition(1,kStartFLP:kEndFLP);
+Longitude = rawDeviceDataset.FLP.horizontalPositionDegree(2,kStartFLP:kEndFLP);
+Latitude = rawDeviceDataset.FLP.horizontalPositionDegree(1,kStartFLP:kEndFLP);
 
 % plot horizontal position (latitude / longitude) trajectory on Google map
 figure;
@@ -45,6 +45,15 @@ plot_google_map('maptype', 'roadmap', 'APIKey', 'AIzaSyB_uD1rGjX6MJkoQgSDyjHkbdu
 legend('Fused Location Provider (FLP)'); hold off;
 xlabel('Longitude [deg]','FontName','Times New Roman','FontSize',17);
 ylabel('Latitude [deg]','FontName','Times New Roman','FontSize',17);
+
+% plot horizontal position (m) trajectory
+FLPTrajectory = rawDeviceDataset.FLP.horizontalPositionMeter(:,kStartFLP:kEndFLP);
+FLPTrajectory(1,:) = (FLPTrajectory(1,:) - FLPTrajectory(1,1));
+FLPTrajectory(2,:) = (FLPTrajectory(2,:) - FLPTrajectory(2,1));
+figure;
+h_FLP = plot(FLPTrajectory(1,:), FLPTrajectory(2,:),'m','LineWidth',2); hold on; grid on; axis equal;
+plot_inertial_frame(5.0); legend([h_FLP],{'FLP'});
+xlabel('x [m]','fontsize',12); ylabel('y [m]','fontsize',12); hold off;
 
 
 % RoNIN data time synchronization
