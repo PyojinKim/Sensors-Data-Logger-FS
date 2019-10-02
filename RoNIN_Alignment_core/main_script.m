@@ -9,7 +9,7 @@ dbstop if error;
 
 % choose the experiment case
 % Smartphone dataset (1~XX)
-expCase = 1;
+expCase = 6;
 
 % are figures drawn?
 % 1 : yes, draw figures to see current status
@@ -25,8 +25,57 @@ toSave = 1;
 setupParams_Smartphone_Dataset;
 
 
-% load & synchronize smartphone dataset data (RoNIN / Magnet / WiFi)
+% load & synchronize smartphone dataset data (RoNIN / Magnet / WiFi / FLP)
 rawDeviceDataset = loadRawSmartphoneDataset(datasetPath);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+kStartFLP = 1000;
+kEndFLP = 1500;
+startTime = rawDeviceDataset.FLP.timestamp(kStartFLP);
+endTime = rawDeviceDataset.FLP.timestamp(kEndFLP);
+
+Longitude = rawDeviceDataset.FLP.horizontalPosition(2,kStartFLP:kEndFLP);
+Latitude = rawDeviceDataset.FLP.horizontalPosition(1,kStartFLP:kEndFLP);
+
+% plot horizontal position (latitude / longitude) trajectory on Google map
+figure;
+plot(Longitude, Latitude, 'k', 'LineWidth', 3); hold on;
+plot_google_map('maptype', 'roadmap', 'APIKey', 'AIzaSyB_uD1rGjX6MJkoQgSDyjHkbdu-b-_5Bjg');
+legend('Fused Location Provider (FLP)'); hold off;
+xlabel('Longitude [deg]','FontName','Times New Roman','FontSize',17);
+ylabel('Latitude [deg]','FontName','Times New Roman','FontSize',17);
+
+
+% RoNIN data time synchronization
+[~, kStartRoNIN] = min(abs(startTime - rawDeviceDataset.RoNIN.timestamp));
+[~, kEndRoNIN] = min(abs(endTime - rawDeviceDataset.RoNIN.timestamp));
+
+roninTrajectory = rawDeviceDataset.RoNIN.trajectory(:,kStartRoNIN:kEndRoNIN);
+roninTrajectory(1,:) = (roninTrajectory(1,:) - roninTrajectory(1,1));
+roninTrajectory(2,:) = (roninTrajectory(2,:) - roninTrajectory(2,1));
+
+% plot RoNIN 2D trajectory
+figure(11);
+h_ronin = plot(roninTrajectory(1,:), roninTrajectory(2,:),'m','LineWidth',2); hold on; grid on; axis equal;
+plot_inertial_frame(5.0); legend([h_ronin],{'RoNIN'});
+xlabel('x [m]','fontsize',12); ylabel('y [m]','fontsize',12); hold off;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 deviceDataset = synchronizeSmartphoneDataset(rawDeviceDataset, kStartMagnet, kEndMagnet);
 
 % various variables from deviceDataset

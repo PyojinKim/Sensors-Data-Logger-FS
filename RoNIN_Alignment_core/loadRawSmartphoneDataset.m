@@ -22,7 +22,7 @@ function [rawDeviceDataset] = loadRawSmartphoneDataset(datasetPath)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % log:
-% 2019-09-20: Complete
+% 2019-10-02: Complete
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 
@@ -118,6 +118,25 @@ end
 rawDeviceDataset.wifi.timestamp = deviceWiFiTime;
 rawDeviceDataset.wifi.numberOfAPs = deviceWiFiNumAPs;
 rawDeviceDataset.wifi.eachAPsInfo = deviceWiFiEachAPInfo;
+
+
+%% 6) load Fused Location Provider (FLP) information
+
+% import text file
+textFLPData = importdata([datasetPath '/FLP.txt'], delimiter, headerlinesIn);
+deviceFLPTime = textFLPData.data(:,1).';
+deviceFLPTime = (deviceFLPTime - deviceReferenceTimeInNanoSecond) ./ nanoSecondToSecond;
+deviceFLPHorizontalPosition = textFLPData.data(:,[2 3 4]).';
+deviceFLPVerticalPosition = textFLPData.data(:,[5 6]).';
+deviceFLPBearingAngle = textFLPData.data(:,[7 8]).';
+deviceFLPSpeed= textFLPData.data(:,[9 10]).';
+
+% save the results
+rawDeviceDataset.FLP.timestamp = deviceFLPTime;
+rawDeviceDataset.FLP.horizontalPosition = deviceFLPHorizontalPosition;
+rawDeviceDataset.FLP.verticalPosition = deviceFLPVerticalPosition;
+rawDeviceDataset.FLP.bearingAngle = deviceFLPBearingAngle;
+rawDeviceDataset.FLP.speed = deviceFLPSpeed;
 
 
 end

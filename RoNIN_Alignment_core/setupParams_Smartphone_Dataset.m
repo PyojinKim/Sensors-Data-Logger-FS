@@ -37,4 +37,11 @@ switch( expCase )
         imInit      = 1;        % first image index, (1-based index)
         M           = 1;        % number of images
         
+        
+    case 6
+        datasetPath = 'G:/Smartphone_Dataset/1_Lifelong_Learning/Google_Pixel_2_XL/20190930035631R_pjinkim';
+        
+        imInit      = 1;        % first image index, (1-based index)
+        M           = 1;        % number of images
+        
 end
