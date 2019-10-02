@@ -31,7 +31,7 @@ rawDeviceDataset = loadRawSmartphoneDataset(datasetPath);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 kStartFLP = 1;
-kEndFLP = 50;
+kEndFLP = 221;
 startTime = rawDeviceDataset.FLP.timestamp(kStartFLP);
 endTime = rawDeviceDataset.FLP.timestamp(kEndFLP);
 
@@ -51,7 +51,7 @@ FLPTrajectory = rawDeviceDataset.FLP.horizontalPositionMeter(:,kStartFLP:kEndFLP
 FLPTrajectory(1,:) = (FLPTrajectory(1,:) - FLPTrajectory(1,1));
 FLPTrajectory(2,:) = (FLPTrajectory(2,:) - FLPTrajectory(2,1));
 figure;
-h_FLP = plot(FLPTrajectory(1,:), FLPTrajectory(2,:),'m','LineWidth',2); hold on; grid on; axis equal;
+h_FLP = plot(FLPTrajectory(1,:), FLPTrajectory(2,:),'k','LineWidth',2); hold on; grid on; axis equal;
 plot_inertial_frame(5.0); legend([h_FLP],{'FLP'});
 xlabel('x [m]','fontsize',12); ylabel('y [m]','fontsize',12); hold off;
 
@@ -75,7 +75,8 @@ xlabel('x [m]','fontsize',12); ylabel('y [m]','fontsize',12); hold off;
 
 
 
-
+rawDeviceDataset.RoNIN.timestamp(kStartRoNIN)
+rawDeviceDataset.RoNIN.timestamp(kEndRoNIN)
 
 
 
