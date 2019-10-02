@@ -7,6 +7,9 @@ switch( expCase )
         datasetPath = 'G:/Smartphone_Dataset/1_Lifelong_Learning/Samsung_Galaxy_S9/20191001033504R_pjinkim';
         
     case 2
+        datasetPath = 'G:/Smartphone_Dataset/1_Lifelong_Learning/Samsung_Galaxy_S9/20191001061017R_pjinkim';
+        
+    case 3
         datasetPath = 'G:/Smartphone_Dataset/1_Lifelong_Learning/Google_Pixel_2_XL/20190930035631R_pjinkim';
         
 end

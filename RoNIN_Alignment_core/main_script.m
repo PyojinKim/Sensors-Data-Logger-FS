@@ -31,7 +31,7 @@ rawDeviceDataset = loadRawSmartphoneDataset(datasetPath);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 kStartFLP = 1;
-kEndFLP = 221;
+kEndFLP = 450;
 startTime = rawDeviceDataset.FLP.timestamp(kStartFLP);
 endTime = rawDeviceDataset.FLP.timestamp(kEndFLP);
 
