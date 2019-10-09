@@ -22,6 +22,7 @@ Visualization/*.txt
 Visualization/*.mat
 RoNIN_Alignment_core/*.txt
 RoNIN_Alignment_core/*.mat
+RoNIN_Alignment_core/*.avi
 
 # Gradle files
 .gradle/

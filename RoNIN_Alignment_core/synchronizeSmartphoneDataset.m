@@ -1,4 +1,4 @@
-function [deviceDataset] = synchronizeSmartphoneDataset(rawDeviceDataset, kStartMagnet, kEndMagnet)
+function [deviceDataset] = synchronizeSmartphoneDataset(rawDeviceDataset, timeInterval)
 % Project:    RoNIN Alignment with Multiple Sensors
 % Function:  synchronizeSmartphoneDataset
 %
@@ -11,6 +11,7 @@ function [deviceDataset] = synchronizeSmartphoneDataset(rawDeviceDataset, kStart
 %
 %   INPUT:
 %   rawDeviceDataset: result from loadRawSmartphoneDataset function
+%   timeInterval: time resolution (second)
 %
 %
 % NOTE:
@@ -22,58 +23,50 @@ function [deviceDataset] = synchronizeSmartphoneDataset(rawDeviceDataset, kStart
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % log:
-% 2019-09-25: Complete
+% 2019-10-10: ing
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 
-% magnet reference time and data
-syncTimestamp = rawDeviceDataset.magnet.timestamp(kStartMagnet:kEndMagnet);
-numMagnetData = size(syncTimestamp,2);
+% define reference time and data
+endTimeRoNIN = rawDeviceDataset.RoNIN.timestamp(end);
+endTimeFLP = rawDeviceDataset.FLP.timestamp(end);
+syncTimestamp = [0.001:timeInterval:max(endTimeRoNIN,endTimeFLP)];
+numData = size(syncTimestamp,2);
 
 % synchronize & compensate magnetic field w.r.t. global frame
-timeDifferenceThreshold = 0.01;
-syncRoninPose = zeros(2,numMagnetData);
-syncDeviceOrientation = zeros(3,3,numMagnetData);
-syncMagnetField = zeros(3,numMagnetData);
-syncRawMagnetField = zeros(3,numMagnetData);
-for k = 1:numMagnetData
+syncRoninPose = zeros(2,numData);
+syncFLPhorizontalPositionDegree = zeros(2,numData);
+syncFLPhorizontalPositionMeter = zeros(2,numData);
+syncFLPhorizontalPositionRadius = zeros(1,numData);
+for k = 1:numData
     
-    % current reference magnet time
+    % remove future timestamp
     currentTime = syncTimestamp(k);
+    validIndexRoNIN = ((currentTime - rawDeviceDataset.RoNIN.timestamp) > 0);
+    validIndexFLP = ((currentTime - rawDeviceDataset.FLP.timestamp) > 0);
+    timestampRoNIN = rawDeviceDataset.RoNIN.timestamp(validIndexRoNIN);
+    timestampFLP = rawDeviceDataset.FLP.timestamp(validIndexFLP);
     
     % RoNIN
-    [timeDifference, roninIndex] = min(abs(currentTime - rawDeviceDataset.RoNIN.timestamp));
-    if (timeDifference < timeDifferenceThreshold)
-        syncRoninPose(:,k) = rawDeviceDataset.RoNIN.trajectory(:,roninIndex);
-    end
+    [~,indexRoNIN] = min(abs(currentTime - timestampRoNIN));
+    syncRoninPose(:,k) = rawDeviceDataset.RoNIN.trajectory(:,indexRoNIN);
     
-    % device orientation
-    [timeDifference, orientationIndex] = min(abs(currentTime - rawDeviceDataset.grv.timestamp));
-    if (timeDifference < timeDifferenceThreshold)
-        syncDeviceOrientation(:,:,k) = rawDeviceDataset.grv.R_gb(:,:,orientationIndex);
-        R_gb = rawDeviceDataset.grv.R_gb(:,:,orientationIndex);
-    end
+    % FLP
+    [~,indexFLP] = min(abs(currentTime - timestampFLP));
+    syncFLPhorizontalPositionDegree(:,k) = rawDeviceDataset.FLP.horizontalPositionDegree(1:2,indexFLP);
+    syncFLPhorizontalPositionMeter(:,k) = rawDeviceDataset.FLP.horizontalPositionMeter(:,indexFLP);
+    syncFLPhorizontalPositionRadius(k) = rawDeviceDataset.FLP.horizontalPositionDegree(3,indexFLP);
     
-    % calibrated magnetic field
-    [timeDifference, magnetIndex] = min(abs(currentTime - rawDeviceDataset.magnet.timestamp));
-    if (timeDifference < timeDifferenceThreshold)
-        syncMagnetField(:,k) = R_gb * rawDeviceDataset.magnet.vectorField(:,magnetIndex);
-    end
-    
-    % raw magnetic field
-    [timeDifference, rawMagnetIndex] = min(abs(currentTime - rawDeviceDataset.magnet_uncalib.timestamp));
-    if (timeDifference < timeDifferenceThreshold)
-        syncRawMagnetField(:,k) = R_gb * rawDeviceDataset.magnet_uncalib.vectorField(:,rawMagnetIndex);
-    end
-    fprintf('Current Status: %d / %d \n', k, numMagnetData);
+    % display current status
+    fprintf('Current Status: %d / %d \n', k, numData);
 end
 
 % save the synchronized & compensated results
 deviceDataset.syncTimestamp = syncTimestamp;
 deviceDataset.syncRoninPose = syncRoninPose;
-deviceDataset.syncDeviceOrientation = syncDeviceOrientation;
-deviceDataset.syncMagnetField = syncMagnetField;
-deviceDataset.syncRawMagnetField = syncRawMagnetField;
+deviceDataset.syncFLPhorizontalPositionDegree = syncFLPhorizontalPositionDegree;
+deviceDataset.syncFLPhorizontalPositionMeter = syncFLPhorizontalPositionMeter;
+deviceDataset.syncFLPhorizontalPositionRadius = syncFLPhorizontalPositionRadius;
 
 end
 

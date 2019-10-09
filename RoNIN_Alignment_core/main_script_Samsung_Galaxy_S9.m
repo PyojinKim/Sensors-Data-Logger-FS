@@ -22,11 +22,12 @@ toVisualize = 1;
 toSave = 1;
 
 
-setupParams_Smartphone_Dataset;
+setupParams_Samsung_Galaxy_S9_Dataset;
 
 
 % load & synchronize smartphone dataset data (RoNIN / Magnet / WiFi / FLP)
 rawDeviceDataset = loadRawSmartphoneDataset(datasetPath);
+deviceDataset = synchronizeSmartphoneDataset(rawDeviceDataset, 0.5);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -40,7 +41,7 @@ Latitude = rawDeviceDataset.FLP.horizontalPositionDegree(1,kStartFLP:kEndFLP);
 
 % plot horizontal position (latitude / longitude) trajectory on Google map
 figure;
-plot(Longitude, Latitude, 'k', 'LineWidth', 3); hold on;
+plot(Longitude, Latitude, 'k.', 'LineWidth', 3); hold on;
 plot_google_map('maptype', 'roadmap', 'APIKey', 'AIzaSyB_uD1rGjX6MJkoQgSDyjHkbdu-b-_5Bjg');
 legend('Fused Location Provider (FLP)'); hold off;
 xlabel('Longitude [deg]','FontName','Times New Roman','FontSize',17);

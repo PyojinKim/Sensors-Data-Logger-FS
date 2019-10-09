@@ -1,3 +1,63 @@
+%% 1) RoNIN by IMUs
+
+% import text file
+textRoninData = importdata('ronin.txt', delimiter, headerlinesIn);
+deviceRoninTime = textRoninData.data(:,1).';
+deviceRoninTrajectory = textRoninData.data(:,[2:3]).';
+deviceRoninTrajectory(1,:) = (deviceRoninTrajectory(1,:) - deviceRoninTrajectory(1,1));
+deviceRoninTrajectory(2,:) = (deviceRoninTrajectory(2,:) - deviceRoninTrajectory(2,1));
+
+R = angle2rotmtx([0;0;(deg2rad(0))]);
+R = R(1:2,1:2);
+deviceRoninTrajectory = R * deviceRoninTrajectory;
+
+% plot RoNIN 2D trajectory
+figure(11);
+h_ronin = plot(deviceRoninTrajectory(1,:), deviceRoninTrajectory(2,:),'m','LineWidth',2); hold on; grid on; axis equal;
+legend([h_ronin],{'RoNIN'}); hold off;
+xlabel('x [m]','FontName','Times New Roman','FontSize',17);
+ylabel('y [m]','FontName','Times New Roman','FontSize',17);
+
+
+%% 2) Fused Location Provider by Google (FLP)
+
+% import text file
+textFLPData = importdata('FLP.txt', delimiter, headerlinesIn);
+FLPTimeSec = textFLPData.data(:,1).';
+FLPTimeSec = (FLPTimeSec - FLPTimeSec(1)) ./ nanoSecondToSecond;
+FLPHorizontalPosition = textFLPData.data(:,[2 3 4]).';
+
+% plot horizontal position (latitude / longitude) trajectory on Google map
+figure;
+plot(FLPHorizontalPosition(2,:), FLPHorizontalPosition(1,:), 'k', 'LineWidth', 3); hold on;
+plot_google_map('maptype', 'roadmap', 'APIKey', 'AIzaSyB_uD1rGjX6MJkoQgSDyjHkbdu-b-_5Bjg');
+legend('Fused Location Provider'); hold off;
+xlabel('Longitude [deg]','FontName','Times New Roman','FontSize',17);
+ylabel('Latitude [deg]','FontName','Times New Roman','FontSize',17);
+set(gcf,'Units','pixels','Position',[400 200 1000 700]);  % modify figure
+FLPTimeSec(end)/60
+
+
+%% 3) Core Location by Apple (gps)
+
+% import text file
+textGPSData = importdata('gps.txt', delimiter, headerlinesIn);
+GPSTimeSec = textGPSData.data(:,1).';
+GPSTimeSec = (GPSTimeSec - GPSTimeSec(1)) ./ nanoSecondToSecond;
+GPSHorizontalPosition = textGPSData.data(:,[2 3 4]).';
+
+% plot horizontal position (latitude / longitude) trajectory on Google map
+figure;
+plot(GPSHorizontalPosition(2,:), GPSHorizontalPosition(1,:), 'k', 'LineWidth', 3); hold on;
+plot_google_map('maptype', 'roadmap', 'APIKey', 'AIzaSyB_uD1rGjX6MJkoQgSDyjHkbdu-b-_5Bjg');
+legend('Core Location'); hold off;
+xlabel('Longitude [deg]','FontName','Times New Roman','FontSize',17);
+ylabel('Latitude [deg]','FontName','Times New Roman','FontSize',17);
+set(gcf,'Units','pixels','Position',[400 200 1000 700]);  % modify figure
+GPSTimeSec(end)/60
+
+
+%%
 
 % play 3-DoF device orientation
 figure(10);
@@ -14,6 +74,7 @@ for k = 1:5:numData
     plot3(B(1,5:6),B(2,5:6),B(3,5:6),'-b','LineWidth',1);  % z: blue
     refresh; pause(0.01); k
 end
+
 
 %% unbiased vs raw rotation rate comparison
 
