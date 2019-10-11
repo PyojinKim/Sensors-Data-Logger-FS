@@ -19,15 +19,19 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import java.io.IOException;
 import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ForegroundService extends Service {
 
     // properties
     private static final String LOG_TAG = ForegroundService.class.getName();
+    public static final String TIME_INFO = "TimeInfo";
     public static final String CHANNEL_ID = "ForegroundServiceChannel";
 
     public static final String ACTION_START_FOREGROUND_SERVICE = "ACTION_START_FOREGROUND_SERVICE";
@@ -44,6 +48,9 @@ public class ForegroundService extends Service {
     private Handler mHandler = new Handler();
     private AtomicBoolean mIsRecording = new AtomicBoolean(false);
     private PowerManager.WakeLock mWakeLock;
+
+    private Timer mInterfaceTimer = new Timer();
+    private int mSecondCounter = 0;
 
 
     // Android service lifecycle states
@@ -192,10 +199,24 @@ public class ForegroundService extends Service {
         mBatterySession.startSession(outputFolder);
         mFLPSession.startSession(outputFolder);
         mIsRecording.set(true);
+
+        // start interface timer on screen
+        mSecondCounter = 0;
+        mInterfaceTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                mSecondCounter += 1;
+                Intent timerInfoIntent = new Intent(TIME_INFO);
+                timerInfoIntent.putExtra("VALUE", interfaceIntTime(mSecondCounter));
+                LocalBroadcastManager.getInstance(ForegroundService.this).sendBroadcast(timerInfoIntent);
+            }
+        }, 0, 1000);
     }
 
 
     protected void stopRecording() {
+
+        // stop all session
         mHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -208,6 +229,12 @@ public class ForegroundService extends Service {
                 mIsRecording.set(false);
             }
         });
+
+        // stop interface timer on screen
+        mInterfaceTimer.cancel();
+        Intent timerInfoIntent = new Intent(TIME_INFO);
+        timerInfoIntent.putExtra("VALUE", "Completed");
+        LocalBroadcastManager.getInstance(ForegroundService.this).sendBroadcast(timerInfoIntent);
     }
 
 
