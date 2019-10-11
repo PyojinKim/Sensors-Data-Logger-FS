@@ -2,14 +2,19 @@ package com.pjinkim.sensors_data_logger_fs;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -28,6 +33,8 @@ public class MainActivity extends AppCompatActivity {
     };
 
     private Button mStartServiceButton, mStopServiceButton;
+    private TextView mLabelInterfaceTime;
+    private TimerStatusReceiver receiver;
 
 
     // Android activity lifecycle states
@@ -38,21 +45,34 @@ public class MainActivity extends AppCompatActivity {
 
         // initialize screen labels and buttons
         initializeViews();
+        receiver = new TimerStatusReceiver();
     }
 
 
     @Override
     protected void onResume() {
         super.onResume();
+
+        // request Android permissions
         if (!hasPermissions(this, REQUIRED_PERMISSIONS)) {
             requestPermissions(REQUIRED_PERMISSIONS, REQUEST_CODE_ANDROID);
         }
+
+        // handle time status manager
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, new IntentFilter(ForegroundService.TIME_INFO));
     }
 
 
     @Override
     protected void onPause() {
         super.onPause();
+    }
+
+
+    @Override
+    protected void onStop() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
+        super.onStop();
     }
 
 
@@ -87,5 +107,20 @@ public class MainActivity extends AppCompatActivity {
 
         mStartServiceButton = (Button) findViewById(R.id.button_start_service);
         mStopServiceButton = (Button) findViewById(R.id.button_stop_service);
+        mLabelInterfaceTime = (TextView) findViewById(R.id.label_interface_time);
+    }
+
+
+    // definition of 'TimerStatusReceiver' class
+    private class TimerStatusReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent != null && intent.getAction().equals(ForegroundService.TIME_INFO)) {
+                if (intent.hasExtra("VALUE")) {
+                    mLabelInterfaceTime.setText(intent.getStringExtra("VALUE"));
+                }
+            }
+        }
     }
 }

@@ -84,4 +84,21 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:srcCompat="@drawable/gruvi_logo" />
 
+    <TextView
+        android:id="@+id/label_interface_time"
+        android:layout_width="300dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="16dp"
+        android:elegantTextHeight="false"
+        android:fontFamily="@font/roboto_black"
+        android:textAlignment="center"
+        android:textColor="#000000"
+        android:textSize="30sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button_stop_service"
+        tools:text="@string/ready_title" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
