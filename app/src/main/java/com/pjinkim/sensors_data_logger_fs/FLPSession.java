@@ -157,9 +157,6 @@ public class FLPSession {
                 StringBuilder stringBuilder = new StringBuilder();
                 stringBuilder.append(location.getElapsedRealtimeNanos()); // nano seconds since boot
                 stringBuilder.append(String.format(Locale.US, " %.6f %.6f %.6f", location.getLatitude(), location.getLongitude(), location.getAccuracy()));
-                stringBuilder.append(String.format(Locale.US, " %.6f %.6f", location.getAltitude(), location.getVerticalAccuracyMeters()));
-                stringBuilder.append(String.format(Locale.US, " %.6f %.6f", location.getBearing(), location.getBearingAccuracyDegrees()));
-                stringBuilder.append(String.format(Locale.US, " %.6f %.6f", location.getSpeed(), location.getSpeedAccuracyMetersPerSecond()));
                 stringBuilder.append(" \n");
                 mWriter.write(stringBuilder.toString());
             }
