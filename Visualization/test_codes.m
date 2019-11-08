@@ -29,7 +29,7 @@ FLPHorizontalPosition = textFLPData.data(:,[2 3 4]).';
 
 % plot horizontal position (latitude / longitude) trajectory on Google map
 figure;
-plot(FLPHorizontalPosition(2,:), FLPHorizontalPosition(1,:), 'k', 'LineWidth', 3); hold on;
+plot(FLPHorizontalPosition(2,:), FLPHorizontalPosition(1,:), 'k*-', 'LineWidth', 1); hold on;
 plot_google_map('maptype', 'roadmap', 'APIKey', 'AIzaSyB_uD1rGjX6MJkoQgSDyjHkbdu-b-_5Bjg');
 legend('Fused Location Provider'); hold off;
 xlabel('Longitude [deg]','FontName','Times New Roman','FontSize',17);
