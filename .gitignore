@@ -12,6 +12,7 @@
 bin/
 gen/
 out/
+*.png
 
 # Folders
 Visualization/IMU_100Hz_WIFI_OFF

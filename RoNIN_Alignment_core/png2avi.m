@@ -1,7 +1,7 @@
 %% make .avi file from png files
 
 movie = VideoWriter('myAVI.avi');
-movie.FrameRate = 15;  % set fps
+movie.FrameRate = 2;  % set fps
 open(movie);
 
 for imgIdx = 1:numData
