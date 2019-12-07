@@ -36,8 +36,6 @@ public class ForegroundService extends Service {
 
     public static final String ACTION_START_FOREGROUND_SERVICE = "ACTION_START_FOREGROUND_SERVICE";
     public static final String ACTION_STOP_FOREGROUND_SERVICE = "ACTION_STOP_FOREGROUND_SERVICE";
-    public static final String ACTION_START_RECORDING = "ACTION_START_RECORDING";
-    public static final String ACTION_STOP_RECORDING = "ACTION_STOP_RECORDING";
 
     private IMUConfig mConfig = new IMUConfig();
     private IMUSession mIMUSession;
@@ -80,23 +78,25 @@ public class ForegroundService extends Service {
             String action = intent.getAction();
             switch (action) {
                 case ACTION_START_FOREGROUND_SERVICE:
+
+                    // start foreground service (FS)
                     startForegroundService();
-                    Toast.makeText(this, "Foreground service now starts!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "Foreground service now starts!", Toast.LENGTH_SHORT).show();
+
+                    // start recording various sensor measurements
+                    startRecording();
+                    Toast.makeText(this, "You click Record button!", Toast.LENGTH_SHORT).show();
                     break;
 
                 case ACTION_STOP_FOREGROUND_SERVICE:
-                    stopForegroundService();
-                    Toast.makeText(this, "Foreground service stops!", Toast.LENGTH_LONG).show();
-                    break;
 
-                case ACTION_START_RECORDING:
-                    startRecording();
-                    Toast.makeText(this, "You click Record button!", Toast.LENGTH_LONG).show();
-                    break;
-
-                case ACTION_STOP_RECORDING:
+                    // stop & save the recorded text files
                     stopRecording();
-                    Toast.makeText(this, "You click Stop button!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "You click Stop button!", Toast.LENGTH_SHORT).show();
+
+                    // stop foreground service (FS)
+                    stopForegroundService();
+                    Toast.makeText(this, "Foreground service stops!", Toast.LENGTH_SHORT).show();
                     break;
             }
         }
@@ -141,29 +141,14 @@ public class ForegroundService extends Service {
         builder.setLargeIcon(largeIconBitmap);
         builder.setWhen(System.currentTimeMillis());
         builder.setContentTitle("Sensors Data Logger in FS");
-        builder.setContentText("Click RECORD button to save IMU/WiFi data.");
+        builder.setContentText("Now, recording IMU/WiFi data for WiFi SfM.");
         builder.setDefaults(Notification.DEFAULT_ALL);
         builder.setPriority(NotificationCompat.PRIORITY_MAX);
         builder.setFullScreenIntent(pendingIntent, true);
 
-        // add Record button intent in notification
-        Intent recordIntent = new Intent(this, ForegroundService.class);
-        recordIntent.setAction(ACTION_START_RECORDING);
-        PendingIntent pendingRecordIntent = PendingIntent.getService(this, 0, recordIntent, 0);
-        NotificationCompat.Action recordAction = new NotificationCompat.Action(android.R.drawable.ic_media_play, "RECORD", pendingRecordIntent);
-        builder.addAction(recordAction);
-
-        // add Stop button intent in notification
-        Intent stopIntent = new Intent(this, ForegroundService.class);
-        stopIntent.setAction(ACTION_STOP_RECORDING);
-        PendingIntent pendingStopIntent = PendingIntent.getService(this, 0, stopIntent, 0);
-        NotificationCompat.Action stopAction = new NotificationCompat.Action(android.R.drawable.ic_media_pause, "STOP", pendingStopIntent);
-        builder.addAction(stopAction);
-
         // build the notification
         createNotificationChannel();
         Notification notification = builder.build();
-
 
         // start foreground service
         startForeground(1, notification);
