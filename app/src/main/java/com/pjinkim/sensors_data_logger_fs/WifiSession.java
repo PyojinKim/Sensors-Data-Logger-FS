@@ -22,7 +22,7 @@ public class WifiSession implements Runnable {
     // properties
     private final static String LOG_TAG = WifiSession.class.getName();
 
-    private final static int DEFAULT_INTERVAL = 30 * 1000; // milli second
+    private final static int DEFAULT_INTERVAL = 10 * 1000; // milli second
     private int mScanInterval = DEFAULT_INTERVAL;
 
     private ForegroundService mContext;
@@ -170,6 +170,16 @@ public class WifiSession implements Runnable {
                     stringBuilder.append(eachResult.BSSID);
                     stringBuilder.append('\t');
                     stringBuilder.append(String.valueOf(eachResult.level));
+                    stringBuilder.append('\t');
+                    stringBuilder.append(eachResult.SSID);
+                    stringBuilder.append('\t');
+                    stringBuilder.append(eachResult.frequency);
+                    stringBuilder.append('\t');
+                    stringBuilder.append(eachResult.centerFreq0);
+                    stringBuilder.append('\t');
+                    stringBuilder.append(eachResult.centerFreq1);
+                    stringBuilder.append('\t');
+                    stringBuilder.append(eachResult.channelWidth);
                     stringBuilder.append('\n');
                 }
                 mWriter.write(stringBuilder.toString());

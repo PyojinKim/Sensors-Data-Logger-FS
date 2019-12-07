@@ -72,7 +72,7 @@ public class IMUConfig implements java.io.Serializable {
     }
 
     public String getSuffix() {
-        return "R_pjinkim";
+        return "R_WiFi_SfM";
     }
 }
 
