@@ -171,8 +171,6 @@ public class WifiSession implements Runnable {
                     stringBuilder.append('\t');
                     stringBuilder.append(String.valueOf(eachResult.level));
                     stringBuilder.append('\t');
-                    stringBuilder.append(eachResult.SSID);
-                    stringBuilder.append('\t');
                     stringBuilder.append(eachResult.frequency);
                     stringBuilder.append('\t');
                     stringBuilder.append(eachResult.centerFreq0);
@@ -180,6 +178,8 @@ public class WifiSession implements Runnable {
                     stringBuilder.append(eachResult.centerFreq1);
                     stringBuilder.append('\t');
                     stringBuilder.append(eachResult.channelWidth);
+                    stringBuilder.append('\t');
+                    stringBuilder.append(eachResult.SSID);
                     stringBuilder.append('\n');
                 }
                 mWriter.write(stringBuilder.toString());
