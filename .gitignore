@@ -24,6 +24,9 @@ Visualization/*.mat
 RoNIN_Alignment_core/*.txt
 RoNIN_Alignment_core/*.mat
 RoNIN_Alignment_core/*.avi
+WiFi_SfM_core/*.txt
+WiFi_SfM_core/*.mat
+WiFi_SfM_core/*.avi
 
 # Gradle files
 .gradle/
