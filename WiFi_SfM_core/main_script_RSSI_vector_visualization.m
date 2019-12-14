@@ -27,7 +27,17 @@ nanoSecondToSecond = 1000000000;
 
 
 
-coeff = pca(wifiScanRSSI(1).RSSI)
+
+tempRSSI = [];
+for k = 1:size(wifiScanRSSI,2)
+    tempRSSI = [tempRSSI, wifiScanRSSI(k).RSSI];
+end
+
+
+
+
+
+coeff = pca(tempRSSI);
 
 
 
