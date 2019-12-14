@@ -1,4 +1,4 @@
-package com.pjinkim.sensors_data_logger_fs;
+package com.pjinkim.sensors_data_logger_fs.location;
 
 import android.content.Context;
 import android.location.Location;
@@ -13,6 +13,8 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.pjinkim.sensors_data_logger_fs.ForegroundService;
+import com.pjinkim.sensors_data_logger_fs.fio.FileStreamer;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -72,7 +74,7 @@ public class FLPSession {
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context);
     }
 
-    FLPSession(@NonNull ForegroundService context) {
+    public FLPSession(@NonNull ForegroundService context) {
         this(context, DEFAULT_INTERVAL);
     }
 

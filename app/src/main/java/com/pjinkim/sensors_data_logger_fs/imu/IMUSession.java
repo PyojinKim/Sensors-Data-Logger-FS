@@ -1,4 +1,4 @@
-package com.pjinkim.sensors_data_logger_fs;
+package com.pjinkim.sensors_data_logger_fs.imu;
 
 import android.content.Context;
 import android.content.Intent;
@@ -9,6 +9,9 @@ import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
+
+import com.pjinkim.sensors_data_logger_fs.ForegroundService;
+import com.pjinkim.sensors_data_logger_fs.fio.FileStreamer;
 
 import java.io.File;
 import java.io.FileInputStream;

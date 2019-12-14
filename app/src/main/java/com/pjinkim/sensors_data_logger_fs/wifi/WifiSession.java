@@ -1,4 +1,4 @@
-package com.pjinkim.sensors_data_logger_fs;
+package com.pjinkim.sensors_data_logger_fs.wifi;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -11,6 +11,9 @@ import android.os.Handler;
 
 import androidx.annotation.NonNull;
 
+import com.pjinkim.sensors_data_logger_fs.ForegroundService;
+import com.pjinkim.sensors_data_logger_fs.fio.FileStreamer;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.security.KeyException;
@@ -22,7 +25,7 @@ public class WifiSession implements Runnable {
     // properties
     private final static String LOG_TAG = WifiSession.class.getName();
 
-    private final static int DEFAULT_INTERVAL = 10 * 1000; // milli second
+    private final static int DEFAULT_INTERVAL = 1 * 1000; // milli second
     private int mScanInterval = DEFAULT_INTERVAL;
 
     private ForegroundService mContext;
@@ -64,7 +67,7 @@ public class WifiSession implements Runnable {
         mWifiManager = (WifiManager) mContext.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
     }
 
-    WifiSession(@NonNull ForegroundService context) {
+    public WifiSession(@NonNull ForegroundService context) {
         this(context, DEFAULT_INTERVAL);
     }
 

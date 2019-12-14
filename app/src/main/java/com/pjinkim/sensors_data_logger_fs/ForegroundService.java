@@ -21,6 +21,12 @@ import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.pjinkim.sensors_data_logger_fs.fio.OutputDirectoryManager;
+import com.pjinkim.sensors_data_logger_fs.imu.IMUConfig;
+import com.pjinkim.sensors_data_logger_fs.imu.IMUSession;
+import com.pjinkim.sensors_data_logger_fs.location.FLPSession;
+import com.pjinkim.sensors_data_logger_fs.wifi.WifiSession;
+
 import java.io.IOException;
 import java.util.Locale;
 import java.util.Timer;

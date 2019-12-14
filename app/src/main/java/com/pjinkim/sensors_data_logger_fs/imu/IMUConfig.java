@@ -1,4 +1,4 @@
-package com.pjinkim.sensors_data_logger_fs;
+package com.pjinkim.sensors_data_logger_fs.imu;
 
 public class IMUConfig implements java.io.Serializable {
 
