@@ -21,6 +21,7 @@ import java.nio.channels.FileChannel;
 import java.security.KeyException;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.lang.Math;
 
 public class IMUSession implements SensorEventListener {
 
@@ -39,6 +40,10 @@ public class IMUSession implements SensorEventListener {
     private float[] mAcceBias = new float[3];
     private float[] mGyroBias = new float[3];
     private float[] mMagnetBias = new float[3];
+
+    private float[] mAccelMeasure = new float[3];
+    private float[] mLinearAccelMeasure = new float[3];
+    private float[] mGravityMeasure = new float[3];
 
 
     // constructor
@@ -73,11 +78,13 @@ public class IMUSession implements SensorEventListener {
         }
     }
 
+
     public void unregisterSensors() {
         for (Sensor eachSensor : mSensors.values()) {
             mSensorManager.unregisterListener(this, eachSensor);
         }
     }
+
 
     public void startSession(String streamFolder) {
 
@@ -109,6 +116,7 @@ public class IMUSession implements SensorEventListener {
         }
         mIsRecording.set(true);
     }
+
 
     public void stopSession() {
 
@@ -152,6 +160,7 @@ public class IMUSession implements SensorEventListener {
         mInitialStepCount = -1;
     }
 
+
     @Override
     public void onSensorChanged(final SensorEvent sensorEvent) {
 
@@ -165,6 +174,9 @@ public class IMUSession implements SensorEventListener {
         try {
             switch (eachSensor.getType()) {
                 case Sensor.TYPE_ACCELEROMETER:
+                    mAccelMeasure[0] = sensorEvent.values[0];
+                    mAccelMeasure[1] = sensorEvent.values[1];
+                    mAccelMeasure[2] = sensorEvent.values[2];
                     if (isFileSaved) {
                         mFileStreamer.addRecord(timestamp, "acce", 3, sensorEvent.values);
                     }
@@ -197,12 +209,18 @@ public class IMUSession implements SensorEventListener {
                     break;
 
                 case Sensor.TYPE_LINEAR_ACCELERATION:
+                    mLinearAccelMeasure[0] = sensorEvent.values[0];
+                    mLinearAccelMeasure[1] = sensorEvent.values[1];
+                    mLinearAccelMeasure[2] = sensorEvent.values[2];
                     if (isFileSaved) {
                         mFileStreamer.addRecord(timestamp, "linacce", 3, sensorEvent.values);
                     }
                     break;
 
                 case Sensor.TYPE_GRAVITY:
+                    mGravityMeasure[0] = sensorEvent.values[0];
+                    mGravityMeasure[1] = sensorEvent.values[1];
+                    mGravityMeasure[2] = sensorEvent.values[2];
                     if (isFileSaved) {
                         mFileStreamer.addRecord(timestamp, "gravity", 3, sensorEvent.values);
                     }
@@ -264,9 +282,48 @@ public class IMUSession implements SensorEventListener {
         }
     }
 
+
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
+    }
+
+
+    public boolean isMotionStatic() {
+
+        // default variable setting
+        boolean motionIsStatic = false;
+        double magnitudeThreshold = 0.08;  // m/s^2
+        double directionThreshold = 0.8;   // degrees
+
+
+        // compute the magnitude of each acceleration vector
+        double accelMagnitude = Math.sqrt(mAccelMeasure[0] * mAccelMeasure[0] + mAccelMeasure[1] * mAccelMeasure[1] + mAccelMeasure[2] * mAccelMeasure[2]);
+        double linearAccelMagnitude = Math.sqrt(mLinearAccelMeasure[0] * mLinearAccelMeasure[0] + mLinearAccelMeasure[1] * mLinearAccelMeasure[1] + mLinearAccelMeasure[2] * mLinearAccelMeasure[2]);
+        double gravityMagnitude = Math.sqrt(mGravityMeasure[0] * mGravityMeasure[0] + mGravityMeasure[1] * mGravityMeasure[1] + mGravityMeasure[2] * mGravityMeasure[2]);
+
+
+        // compute the angle between the acceleration and gravity vector
+        double angleDeviation = Math.acos((mAccelMeasure[0] * mGravityMeasure[0] + mAccelMeasure[1] * mGravityMeasure[1] + mAccelMeasure[2] * mGravityMeasure[2]) / (accelMagnitude * gravityMagnitude));
+
+
+        // check motion is static or not
+        if ((linearAccelMagnitude < magnitudeThreshold) && (rad2deg(angleDeviation) <= directionThreshold)) {
+            motionIsStatic = true;
+        }
+        return motionIsStatic;
+    }
+
+
+    private double deg2rad(double angleInDegrees) {
+        double angleInRadians = (Math.PI/180) * angleInDegrees;
+        return angleInRadians;
+    }
+
+
+    private double rad2deg(double angleInRadians) {
+        double angleInDegrees = (180/Math.PI) * angleInRadians;
+        return angleInDegrees;
     }
 
 

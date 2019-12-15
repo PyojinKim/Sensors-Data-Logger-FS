@@ -37,6 +37,7 @@ public class ForegroundService extends Service {
 
     // properties
     private static final String LOG_TAG = ForegroundService.class.getName();
+    public static final String MOTION_INFO = "MotionInfo";
     public static final String TIME_INFO = "TimeInfo";
     public static final String CHANNEL_ID = "ForegroundServiceChannel";
 
