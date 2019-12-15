@@ -7,6 +7,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -57,6 +58,9 @@ public class ForegroundService extends Service {
     private Timer mInterfaceTimer = new Timer();
     private int mSecondCounter = 0;
 
+    private Timer mMotionStatusTimer = new Timer();
+    private String mMotionStatus = "";
+
 
     // Android service lifecycle states
     @Override
@@ -69,10 +73,32 @@ public class ForegroundService extends Service {
         mBatterySession = new BatterySession(this);
         mFLPSession = new FLPSession(this);
 
+
         // battery power setting
         PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
         mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "sensors_data_logger:wakelocktag");
         mWakeLock.acquire();
+
+
+        // start motion status on screen
+        mMotionStatus = "Moving";
+        mMotionStatusTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+
+                // check the phone is static or not
+                if (mIMUSession.isMotionStatic()) {
+                    mMotionStatus = "Static";
+                } else {
+                    mMotionStatus = "Moving";
+                }
+
+                // broadcast the current motion status
+                Intent motionInfoIntent = new Intent(MOTION_INFO);
+                motionInfoIntent.putExtra("VALUE", mMotionStatus);
+                LocalBroadcastManager.getInstance(ForegroundService.this).sendBroadcast(motionInfoIntent);
+            }
+        }, 0, 500);
     }
 
 
@@ -227,6 +253,12 @@ public class ForegroundService extends Service {
         Intent timerInfoIntent = new Intent(TIME_INFO);
         timerInfoIntent.putExtra("VALUE", "Completed");
         LocalBroadcastManager.getInstance(ForegroundService.this).sendBroadcast(timerInfoIntent);
+
+        // stop motion status on screen
+        mMotionStatusTimer.cancel();
+        Intent motionInfoIntent = new Intent(MOTION_INFO);
+        motionInfoIntent.putExtra("VALUE", "Completed");
+        LocalBroadcastManager.getInstance(ForegroundService.this).sendBroadcast(motionInfoIntent);
     }
 
 

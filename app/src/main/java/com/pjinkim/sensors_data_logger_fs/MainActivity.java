@@ -32,8 +32,9 @@ public class MainActivity extends AppCompatActivity {
     };
 
     private Button mStartServiceButton, mStopServiceButton;
-    private TextView mLabelInterfaceTime;
-    private TimerStatusReceiver receiver;
+    private TextView mLabelInterfaceTime, mLabelMotionStatus;
+    private TimerStatusReceiver timeReceiver;
+    private MotionStatusReceiver motionReceiver;
 
 
     // Android activity lifecycle states
@@ -44,7 +45,8 @@ public class MainActivity extends AppCompatActivity {
 
         // initialize screen labels and buttons
         initializeViews();
-        receiver = new TimerStatusReceiver();
+        timeReceiver = new TimerStatusReceiver();
+        motionReceiver = new MotionStatusReceiver();
     }
 
 
@@ -58,7 +60,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // handle time status manager
-        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, new IntentFilter(ForegroundService.TIME_INFO));
+        LocalBroadcastManager.getInstance(this).registerReceiver(timeReceiver, new IntentFilter(ForegroundService.TIME_INFO));
+        LocalBroadcastManager.getInstance(this).registerReceiver(motionReceiver, new IntentFilter(ForegroundService.MOTION_INFO));
     }
 
 
@@ -70,7 +73,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onStop() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(timeReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(motionReceiver);
         super.onStop();
     }
 
@@ -106,7 +110,23 @@ public class MainActivity extends AppCompatActivity {
 
         mStartServiceButton = (Button) findViewById(R.id.button_start_service);
         mStopServiceButton = (Button) findViewById(R.id.button_stop_service);
+
         mLabelInterfaceTime = (TextView) findViewById(R.id.label_interface_time);
+        mLabelMotionStatus = (TextView) findViewById(R.id.label_motion_status);
+    }
+
+
+    // definition of 'MotionStatusReceiver' class
+    private class MotionStatusReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent != null && intent.getAction().equals(ForegroundService.MOTION_INFO)) {
+                if (intent.hasExtra("VALUE")) {
+                    mLabelMotionStatus.setText(intent.getStringExtra("VALUE"));
+                }
+            }
+        }
     }
 
 

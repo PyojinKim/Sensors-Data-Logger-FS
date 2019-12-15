@@ -293,8 +293,8 @@ public class IMUSession implements SensorEventListener {
 
         // default variable setting
         boolean motionIsStatic = false;
-        double magnitudeThreshold = 0.08;  // m/s^2
-        double directionThreshold = 0.8;   // degrees
+        double magnitudeThreshold = 0.1;  // m/s^2
+        double directionThreshold = 0.9;  // degrees
 
 
         // compute the magnitude of each acceleration vector
@@ -310,6 +310,8 @@ public class IMUSession implements SensorEventListener {
         // check motion is static or not
         if ((linearAccelMagnitude < magnitudeThreshold) && (rad2deg(angleDeviation) <= directionThreshold)) {
             motionIsStatic = true;
+        } else {
+            motionIsStatic = false;
         }
         return motionIsStatic;
     }
