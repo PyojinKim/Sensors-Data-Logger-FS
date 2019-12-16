@@ -7,7 +7,6 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -93,9 +92,10 @@ public class ForegroundService extends Service {
                     mMotionStatus = "Moving";
                 }
 
-                // broadcast the current motion status
+                // broadcast the current motion status and time
                 Intent motionInfoIntent = new Intent(MOTION_INFO);
                 motionInfoIntent.putExtra("VALUE", mMotionStatus);
+                motionInfoIntent.putExtra("STATIC_TIME", interfaceIntTime((int) mIMUSession.getMotionStaticAccumulatedTime()));
                 LocalBroadcastManager.getInstance(ForegroundService.this).sendBroadcast(motionInfoIntent);
             }
         }, 0, 500);
@@ -258,6 +258,7 @@ public class ForegroundService extends Service {
         mMotionStatusTimer.cancel();
         Intent motionInfoIntent = new Intent(MOTION_INFO);
         motionInfoIntent.putExtra("VALUE", "Completed");
+        motionInfoIntent.putExtra("STATIC_TIME", "Completed");
         LocalBroadcastManager.getInstance(ForegroundService.this).sendBroadcast(motionInfoIntent);
     }
 

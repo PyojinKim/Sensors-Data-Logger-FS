@@ -45,6 +45,9 @@ public class IMUSession implements SensorEventListener {
     private float[] mLinearAccelMeasure = new float[3];
     private float[] mGravityMeasure = new float[3];
 
+    private double mMotionStaticPreviousTimeStamp = 0.0;
+    private double mMotionStaticAccumulatedTime = 0.0;
+
 
     // constructor
     public IMUSession(ForegroundService context) {
@@ -293,8 +296,9 @@ public class IMUSession implements SensorEventListener {
 
         // default variable setting
         boolean motionIsStatic = false;
-        double magnitudeThreshold = 0.1;  // m/s^2
-        double directionThreshold = 0.9;  // degrees
+        final double magnitudeThreshold = 0.1;  // m/s^2
+        final double directionThreshold = 1.0;  // degrees
+        final double durationThreshold = 5.0;   // second
 
 
         // compute the magnitude of each acceleration vector
@@ -308,9 +312,21 @@ public class IMUSession implements SensorEventListener {
 
 
         // check motion is static or not
-        if ((linearAccelMagnitude < magnitudeThreshold) && (rad2deg(angleDeviation) <= directionThreshold)) {
-            motionIsStatic = true;
+        final double currentTimeStamp = ((double) System.currentTimeMillis()) / 1000;  // milli sec to sec
+        final double isMotionStaticTimeDelta = (currentTimeStamp - mMotionStaticPreviousTimeStamp);
+        mMotionStaticPreviousTimeStamp = currentTimeStamp;
+        final boolean isMotionTemporarilyStatic = ((linearAccelMagnitude < magnitudeThreshold) && (rad2deg(angleDeviation) <= directionThreshold));
+        if (isMotionTemporarilyStatic) {
+
+            // accumulate motion static duration time
+            mMotionStaticAccumulatedTime += isMotionStaticTimeDelta;
+            if (mMotionStaticAccumulatedTime > durationThreshold) {
+                motionIsStatic = true;
+            }
         } else {
+
+            // reset motion static accumulated time
+            mMotionStaticAccumulatedTime = 0.0;
             motionIsStatic = false;
         }
         return motionIsStatic;
@@ -344,5 +360,9 @@ public class IMUSession implements SensorEventListener {
 
     public float[] getMagnetBias() {
         return mMagnetBias;
+    }
+
+    public double getMotionStaticAccumulatedTime() {
+        return mMotionStaticAccumulatedTime;
     }
 }

@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
     };
 
     private Button mStartServiceButton, mStopServiceButton;
-    private TextView mLabelInterfaceTime, mLabelMotionStatus;
+    private TextView mLabelInterfaceTime, mLabelMotionStatus, mLabelMotionStaticTime;
     private TimerStatusReceiver timeReceiver;
     private MotionStatusReceiver motionReceiver;
 
@@ -113,6 +113,7 @@ public class MainActivity extends AppCompatActivity {
 
         mLabelInterfaceTime = (TextView) findViewById(R.id.label_interface_time);
         mLabelMotionStatus = (TextView) findViewById(R.id.label_motion_status);
+        mLabelMotionStaticTime = (TextView) findViewById(R.id.label_motion_static_time);
     }
 
 
@@ -124,6 +125,9 @@ public class MainActivity extends AppCompatActivity {
             if (intent != null && intent.getAction().equals(ForegroundService.MOTION_INFO)) {
                 if (intent.hasExtra("VALUE")) {
                     mLabelMotionStatus.setText(intent.getStringExtra("VALUE"));
+                }
+                if (intent.hasExtra("STATIC_TIME")) {
+                    mLabelMotionStaticTime.setText(intent.getStringExtra("STATIC_TIME"));
                 }
             }
         }
