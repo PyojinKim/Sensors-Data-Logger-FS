@@ -28,7 +28,7 @@ public class FLPSession {
     // properties
     private final static String LOG_TAG = FLPSession.class.getName();
 
-    private final static int DEFAULT_INTERVAL = 2 * 1000; // milli second
+    private final static int DEFAULT_INTERVAL = 1 * 1000; // milli second
     private int mLocationInterval = DEFAULT_INTERVAL;
 
     private ForegroundService mContext;
