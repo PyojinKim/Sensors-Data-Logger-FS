@@ -35,6 +35,18 @@ X = [roninScale, roninBias];
 roninLocation = RoninPolarModel(roninInitialLocation, roninPolarSpeed, roninPolarAngle, X);
 
 
+% plot RoNIN 2D trajectory
+figure;
+plot(roninLocation(1,:),roninLocation(2,:),'m-','LineWidth',1.0); hold on; grid on; axis equal;
+set(get(gcf,'CurrentAxes'),'FontName','Times New Roman','FontSize',15);
+xlabel('X [m]','FontName','Times New Roman','FontSize',15);
+ylabel('Y [m]','FontName','Times New Roman','FontSize',15);
+title('Before Optimization','FontName','Times New Roman','FontSize',15);
+set(gcf,'Units','pixels','Position',[900 300 800 600]);  % modify figure
+
+
+
+
 % run nonlinear optimization using lsqnonlin in Matlab (Levenberg-Marquardt)
 options = optimoptions(@lsqnonlin,'Algorithm','levenberg-marquardt','Display','iter-detailed');
 [vec,resnorm,residuals,exitflag] = lsqnonlin(@(x) RoninResidual(roninInitialLocation, roninPolarSpeed, roninPolarAngle, x),X,[],[],options);
@@ -52,6 +64,7 @@ plot(roninLocation(1,:),roninLocation(2,:),'m-','LineWidth',1.0); hold on; grid 
 set(get(gcf,'CurrentAxes'),'FontName','Times New Roman','FontSize',15);
 xlabel('X [m]','FontName','Times New Roman','FontSize',15);
 ylabel('Y [m]','FontName','Times New Roman','FontSize',15);
+title('After Optimization','FontName','Times New Roman','FontSize',15);
 set(gcf,'Units','pixels','Position',[900 300 800 600]);  % modify figure
 
 

@@ -1,9 +1,10 @@
 function [residuals] = RoninResidual(roninInitialLocation, roninPolarSpeed, roninPolarAngle, X)
 
-
+%
 roninLocation = RoninPolarModel(roninInitialLocation, roninPolarSpeed, roninPolarAngle, X);
 
-% 8002.2 office
+
+% 8002.2 office (origin)
 residuals(1) = norm(roninLocation(:,1) - roninLocation(:,256));
 residuals(2) = norm(roninLocation(:,1) - roninLocation(:,1024));
 residuals(3) = norm(roninLocation(:,1) - roninLocation(:,1194));
