@@ -40,9 +40,19 @@ options = optimoptions(@lsqnonlin,'Algorithm','levenberg-marquardt','Display','i
 [vec,resnorm,residuals,exitflag] = lsqnonlin(@(x) RoninResidual(roninInitialLocation, roninPolarSpeed, roninPolarAngle, x),X,[],[],options);
 
 
-temp = RoninResidual(roninInitialLocation, roninPolarSpeed, roninPolarAngle, vec)
-roninLocation = RoninPolarModel(roninInitialLocation, roninPolarSpeed, roninPolarAngle, vec);
+%
+X_optimized = vec;
+roninResidual = RoninResidual(roninInitialLocation, roninPolarSpeed, roninPolarAngle, X_optimized);
+roninLocation = RoninPolarModel(roninInitialLocation, roninPolarSpeed, roninPolarAngle, X_optimized);
 
+
+% plot RoNIN 2D trajectory
+figure;
+plot(roninLocation(1,:),roninLocation(2,:),'m-','LineWidth',1.0); hold on; grid on; axis equal;
+set(get(gcf,'CurrentAxes'),'FontName','Times New Roman','FontSize',15);
+xlabel('X [m]','FontName','Times New Roman','FontSize',15);
+ylabel('Y [m]','FontName','Times New Roman','FontSize',15);
+set(gcf,'Units','pixels','Position',[900 300 800 600]);  % modify figure
 
 
 
