@@ -9,29 +9,50 @@ addpath('devkit_KITTI_GPS');
 
 %% RoNIN
 
-roninResult = parseRoninTextFile('ronin.txt', 100, 225);
+% parse ronin.txt file / compute RoNIN velocity
+roninResult = parseRoninTextFile('ronin.txt', 200, 225);
 roninResult = computeRoninVelocity(roninResult);
 numRonin = size(roninResult,2);
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-% activity detection
+% detect RoNIN stationary motion
 speed = 0.1;     % m/s
 duration = 5.0;  % sec
 roninResult = detectStationaryMotion(roninResult, speed, duration);
+roninResult = removeStationaryMotion(roninResult);
 
+
+% convert RoNIN polar coordinate for nonlinear optimization
+roninPolarResult = convertRoninPolarCoordinate(roninResult);
+roninInitialLocation = roninPolarResult(1).location;
+roninPolarSpeed = [roninPolarResult(:).speed];
+roninPolarAngle = [roninPolarResult(:).angle];
+
+numRonin = size(roninPolarResult,2);
+roninScale = ones(1,numRonin);
+roninBias = zeros(1,numRonin);
+X = [roninScale, roninBias];
+roninLocation = RoninPolarModel(roninInitialLocation, roninPolarSpeed, roninPolarAngle, X);
+
+
+% run nonlinear optimization using lsqnonlin in Matlab (Levenberg-Marquardt)
+options = optimoptions(@lsqnonlin,'Algorithm','levenberg-marquardt','Display','iter-detailed');
+[vec,resnorm,residuals,exitflag] = lsqnonlin(@(x) RoninResidual(roninInitialLocation, roninPolarSpeed, roninPolarAngle, x),X,[],[],options);
+
+
+temp = RoninResidual(roninInitialLocation, roninPolarSpeed, roninPolarAngle, vec)
+roninLocation = RoninPolarModel(roninInitialLocation, roninPolarSpeed, roninPolarAngle, vec);
+
+
+
+
+
+
+
+
+
+
+%%
 
 % vectorize RoNIN result for visualization
 roninTime = [roninResult(:).timestamp];
