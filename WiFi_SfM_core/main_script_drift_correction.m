@@ -10,7 +10,6 @@ addpath('devkit_KITTI_GPS');
 %% preprocessing RoNIN data
 
 
-roninResult = parseRoninTextFile('ronin.txt', 200, 225);
 
 
 

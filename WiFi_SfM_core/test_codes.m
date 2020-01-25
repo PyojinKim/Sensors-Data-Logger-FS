@@ -11,15 +11,11 @@ addpath('devkit_KITTI_GPS');
 
 % parse ronin.txt file / compute RoNIN velocity
 roninResult = parseRoninTextFile('ronin.txt', 200, 225);
-roninResult = computeRoninVelocity(roninResult);
-numRonin = size(roninResult,2);
 
 
-% detect RoNIN stationary motion
-speed = 0.1;     % m/s
-duration = 5.0;  % sec
-roninResult = detectStationaryMotion(roninResult, speed, duration);
-roninResult = removeStationaryMotion(roninResult);
+
+
+
 
 
 % convert RoNIN polar coordinate for nonlinear optimization
