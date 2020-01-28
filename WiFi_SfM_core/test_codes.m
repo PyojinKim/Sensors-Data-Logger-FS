@@ -1,67 +1,3 @@
-clc;
-close all;
-clear variables; %clear classes;
-rand('state',0); % rand('state',sum(100*clock));
-dbstop if error;
-
-addpath('devkit_KITTI_GPS');
-
-
-%% RoNIN
-
-% parse ronin.txt file / compute RoNIN velocity
-roninResult = parseRoninTextFile('ronin.txt', 200, 225);
-
-
-
-
-
-
-
-% convert RoNIN polar coordinate for nonlinear optimization
-roninPolarResult = convertRoninPolarCoordinate(roninResult);
-roninInitialLocation = roninPolarResult(1).location;
-roninPolarSpeed = [roninPolarResult(:).speed];
-roninPolarAngle = [roninPolarResult(:).angle];
-
-numRonin = size(roninPolarResult,2);
-roninScale = ones(1,numRonin);
-roninBias = zeros(1,numRonin);
-X = [roninScale, roninBias];
-roninLocation = RoninPolarModel(roninInitialLocation, roninPolarSpeed, roninPolarAngle, X);
-
-
-% plot RoNIN 2D trajectory
-figure;
-plot(roninLocation(1,:),roninLocation(2,:),'m-','LineWidth',1.0); hold on; grid on; axis equal;
-set(get(gcf,'CurrentAxes'),'FontName','Times New Roman','FontSize',15);
-xlabel('X [m]','FontName','Times New Roman','FontSize',15);
-ylabel('Y [m]','FontName','Times New Roman','FontSize',15);
-title('Before Optimization','FontName','Times New Roman','FontSize',15);
-set(gcf,'Units','pixels','Position',[900 300 800 600]);  % modify figure
-
-
-
-
-% run nonlinear optimization using lsqnonlin in Matlab (Levenberg-Marquardt)
-options = optimoptions(@lsqnonlin,'Algorithm','levenberg-marquardt','Display','iter-detailed');
-[vec,resnorm,residuals,exitflag] = lsqnonlin(@(x) RoninResidual(roninInitialLocation, roninPolarSpeed, roninPolarAngle, x),X,[],[],options);
-
-
-%
-X_optimized = vec;
-roninResidual = RoninResidual(roninInitialLocation, roninPolarSpeed, roninPolarAngle, X_optimized);
-roninLocation = RoninPolarModel(roninInitialLocation, roninPolarSpeed, roninPolarAngle, X_optimized);
-
-
-% plot RoNIN 2D trajectory
-figure;
-plot(roninLocation(1,:),roninLocation(2,:),'m-','LineWidth',1.0); hold on; grid on; axis equal;
-set(get(gcf,'CurrentAxes'),'FontName','Times New Roman','FontSize',15);
-xlabel('X [m]','FontName','Times New Roman','FontSize',15);
-ylabel('Y [m]','FontName','Times New Roman','FontSize',15);
-title('After Optimization','FontName','Times New Roman','FontSize',15);
-set(gcf,'Units','pixels','Position',[900 300 800 600]);  % modify figure
 
 
 
@@ -79,6 +15,13 @@ roninLocation = [roninResult(:).location];
 roninVelocity = [roninResult(:).velocity];
 roninSpeed = [roninResult(:).speed];
 
+roninAcceleration = [roninResult(:).acceleration];
+roninGyro = [roninResult(:).gyro];
+roninGravity = [roninResult(:).gravity];
+roninMagnet = [roninResult(:).magnet];
+
+roninPressure = [roninResult(:).pressure];
+
 
 % plot RoNIN 2D trajectory
 figure;
@@ -94,6 +37,43 @@ ylabel('Y [m]','FontName','Times New Roman','FontSize',15);
 set(gcf,'Units','pixels','Position',[900 300 800 600]);  % modify figure
 
 
+figure;
+subplot(2,1,1);
+plot(roninTime, roninLocation(1,:)); grid on; axis tight;
+subplot(2,1,2);
+plot(roninTime, roninLocation(2,:)); grid on; axis tight;
+
+
+figure;
+subplot(3,1,1);
+plot(roninTime, roninAcceleration(1,:)); grid on; axis tight;
+subplot(3,1,2);
+plot(roninTime, roninAcceleration(2,:)); grid on; axis tight;
+subplot(3,1,3);
+plot(roninTime, roninAcceleration(3,:)); grid on; axis tight;
+
+
+figure;
+subplot(3,1,1);
+plot(roninTime, roninGyro(1,:)); grid on; axis tight;
+subplot(3,1,2);
+plot(roninTime, roninGyro(2,:)); grid on; axis tight;
+subplot(3,1,3);
+plot(roninTime, roninGyro(3,:)); grid on; axis tight;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 GoogleFLPResult = parseGoogleFLPTextFile('FLP.txt');
@@ -102,7 +82,7 @@ locationDegree = [GoogleFLPResult(:).locationDegree];
 
 % plot horizontal position (latitude / longitude) trajectory on Google map
 figure;
-plot(locationDegree(2,:), locationDegree(1,:), 'b*-', 'LineWidth', 1); hold on;
+plot(locationDegree(2,1:3000), locationDegree(1,1:3000), 'b*-', 'LineWidth', 1); hold on;
 plot_google_map('maptype', 'roadmap', 'APIKey', 'AIzaSyB_uD1rGjX6MJkoQgSDyjHkbdu-b-_5Bjg');
 set(get(gcf,'CurrentAxes'),'FontName','Times New Roman','FontSize',15);
 xlabel('Longitude [deg]','FontName','Times New Roman','FontSize',15);

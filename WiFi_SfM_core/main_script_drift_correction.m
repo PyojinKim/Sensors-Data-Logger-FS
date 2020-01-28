@@ -9,39 +9,91 @@ addpath('devkit_KITTI_GPS');
 
 %% preprocessing RoNIN data
 
+%
+datasetDirectory = 'G:/Smartphone_Dataset/4_WiFi_SfM/Prof_Yasu/20200109090901R_WiFi_SfM';
+roninInterval = 200;          % 1 Hz
+roninYawRotation = 225;   % degree
 
 
+% extract RoNIN centric data
+roninResult = extractRoninCentricData(datasetDirectory, roninInterval, roninYawRotation);
+roninResult(1201:end) = [];
 
 
-numRonin = size(roninResult,2);
-roninLocationTemp = zeros(2,numRonin);
-roninLocationTemp(:,1) = roninResult(1).location;
-for k = 2:numRonin
-    
-    deltaX = roninResult(k).speed * cos(roninResult(k).deltaAngle);
-    deltaY = roninResult(k).speed * sin(roninResult(k).deltaAngle);
-    
-    roninLocationTemp(:,k) = roninLocationTemp(:,k-1) + [deltaX; deltaY];
-end
+% convert RoNIN polar coordinate for nonlinear optimization
+roninPolarResult = convertRoninPolarCoordinate(roninResult);
+roninInitialLocation = roninPolarResult(1).location;
+roninPolarSpeed = [roninPolarResult(:).speed];
+roninPolarAngle = [roninPolarResult(:).angle];
 
 
+% scale and bias model parameters for RoNIN drift correction
+numRonin = size(roninPolarResult,2);
+roninScale = ones(1,numRonin);
+roninBias = zeros(1,numRonin);
+X_initial = [roninScale, roninBias];
+roninLocation = DriftCorrectedRoninPolarModel(roninInitialLocation, roninPolarSpeed, roninPolarAngle, X_initial);
 
 
-
-% vectorize RoNIN result for visualization
-roninTime = [roninResult(:).timestamp];
-roninLocation = [roninResult(:).location];
-
-
-% plot RoNIN 2D trajectory
+% plot RoNIN 2D trajectory before nonlinear optimization
 figure;
-plot(roninLocation(1,:),roninLocation(2,:),'m-','LineWidth',1.0); hold on; grid on; axis equal;
+plot(roninLocation(1,:),roninLocation(2,:),'m-','LineWidth',2.0); hold on; grid on; axis equal;
+set(get(gcf,'CurrentAxes'),'FontName','Times New Roman','FontSize',15);
+xlabel('X [m]','FontName','Times New Roman','FontSize',15);
+ylabel('Y [m]','FontName','Times New Roman','FontSize',15);
+title('Before Optimization','FontName','Times New Roman','FontSize',15);
+set(gcf,'Units','pixels','Position',[900 300 800 600]);  % modify figure
 
 
+% run nonlinear optimization using lsqnonlin in Matlab (Levenberg-Marquardt)
+options = optimoptions(@lsqnonlin,'Algorithm','levenberg-marquardt','Display','iter-detailed');
+[vec,resnorm,residuals,exitflag] = lsqnonlin(@(x) EuclideanDistanceResidual(roninInitialLocation, roninPolarSpeed, roninPolarAngle, x),X_initial,[],[],options);
 
-% plot RoNIN 2D trajectory
+
+% optimal scale and bias model parameters for RoNIN drift correction
+X_optimized = vec;
+roninResidual = EuclideanDistanceResidual(roninInitialLocation, roninPolarSpeed, roninPolarAngle, X_optimized);
+roninLocation = DriftCorrectedRoninPolarModel(roninInitialLocation, roninPolarSpeed, roninPolarAngle, X_optimized);
+
+
+% plot RoNIN 2D trajectory after nonlinear optimization
 figure;
-plot(roninLocationTemp(1,:),roninLocationTemp(2,:),'m-','LineWidth',1.0); hold on; grid on; axis equal;
+plot(roninLocation(1,:),roninLocation(2,:),'m-','LineWidth',2.0); hold on; grid on; axis equal;
+set(get(gcf,'CurrentAxes'),'FontName','Times New Roman','FontSize',15);
+xlabel('X [m]','FontName','Times New Roman','FontSize',15);
+ylabel('Y [m]','FontName','Times New Roman','FontSize',15);
+title('After Optimization','FontName','Times New Roman','FontSize',15);
+set(gcf,'Units','pixels','Position',[900 300 800 600]);  % modify figure
+
+
+%%
+
+roninScaleInitial = X_initial(1:numRonin);
+roninBiasInitial = X_initial((numRonin+1):end);
+
+roninScaleOptimal = X_optimized(1:numRonin);
+roninBiasOptimal = X_optimized((numRonin+1):end);
+
+
+% plot scale and bias model parameters for RoNIN drift correction
+figure;
+subplot(2,1,1);
+h_initial = plot(roninScaleInitial,'k','LineWidth',1.5); hold on; grid on;
+h_optimal = plot(roninScaleOptimal,'m','LineWidth',1.5); axis tight;
+set(gcf,'color','w'); hold off;
+set(get(gcf,'CurrentAxes'),'FontName','Times New Roman','FontSize',17);
+xlabel('Scale Model Parameter Index','FontName','Times New Roman','FontSize',17);
+ylabel('Scale','FontName','Times New Roman','FontSize',17);
+legend('Initial','Optimal');
+subplot(2,1,2);
+plot(roninBiasInitial,'k','LineWidth',1.5); hold on; grid on;
+plot(roninBiasOptimal,'m','LineWidth',1.5); axis tight;
+set(gcf,'color','w'); hold off;
+set(get(gcf,'CurrentAxes'),'FontName','Times New Roman','FontSize',17);
+xlabel('Bias Model Parameter Index','FontName','Times New Roman','FontSize',17);
+ylabel('Bias','FontName','Times New Roman','FontSize',17);
+set(gcf,'Units','pixels','Position',[900 300 800 600]);  % modify figure
+
 
 
 
