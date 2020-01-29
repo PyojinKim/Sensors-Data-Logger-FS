@@ -10,14 +10,13 @@ addpath('devkit_KITTI_GPS');
 %% preprocessing RoNIN data
 
 %
-datasetDirectory = 'G:/Smartphone_Dataset/4_WiFi_SfM/Prof_Yasu/20200109090901R_WiFi_SfM';
+datasetDirectory = 'G:/Smartphone_Dataset/4_WiFi_SfM/Asus_Tango/SFU_TASC1_8000/20200114112923R_WiFi_SfM';
 roninInterval = 200;          % 1 Hz
-roninYawRotation = 225;   % degree
+roninYawRotation = 190;   % degree
 
 
 % extract RoNIN centric data
 roninResult = extractRoninCentricData(datasetDirectory, roninInterval, roninYawRotation);
-roninResult(1201:end) = [];
 
 
 % convert RoNIN polar coordinate for nonlinear optimization

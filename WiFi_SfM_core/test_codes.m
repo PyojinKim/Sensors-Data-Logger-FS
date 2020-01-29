@@ -82,13 +82,12 @@ locationDegree = [GoogleFLPResult(:).locationDegree];
 
 % plot horizontal position (latitude / longitude) trajectory on Google map
 figure;
-plot(locationDegree(2,1:3000), locationDegree(1,1:3000), 'b*-', 'LineWidth', 1); hold on;
+plot(locationDegree(2,:), locationDegree(1,:), 'b*-', 'LineWidth', 1); hold on;
 plot_google_map('maptype', 'roadmap', 'APIKey', 'AIzaSyB_uD1rGjX6MJkoQgSDyjHkbdu-b-_5Bjg');
 set(get(gcf,'CurrentAxes'),'FontName','Times New Roman','FontSize',15);
 xlabel('Longitude [deg]','FontName','Times New Roman','FontSize',15);
 ylabel('Latitude [deg]','FontName','Times New Roman','FontSize',15);
 set(gcf,'Units','pixels','Position',[900 300 800 600]);  % modify figure
-
 
 
 %%
