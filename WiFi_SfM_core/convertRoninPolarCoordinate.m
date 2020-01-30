@@ -21,12 +21,11 @@ for k = 2:numRonin
 end
 
 
-% % compute
-% roninPolarResult(1).deltaAngle = 0;
-% roninPolarResult(2).deltaAngle = 0;
-% for k = 3:numRonin
-%     roninPolarResult(k).deltaAngle = roninPolarResult(k).angle - roninPolarResult(k-1).angle;
-% end
+% compute difference of angle for RoNIN accumulation nature
+roninPolarResult(1).deltaAngle = 0;
+for k = 2:numRonin
+    roninPolarResult(k).deltaAngle = roninPolarResult(k).angle - roninPolarResult(k-1).angle;
+end
 
 
 end

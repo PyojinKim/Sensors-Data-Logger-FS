@@ -3,7 +3,27 @@
 
 
 
+%% analyze the RoNIN trajectory
 
+
+roninLocation = [roninResult(:).location];
+
+% plot RoNIN 2D trajectory
+figure;
+plot(roninLocation(1,:),roninLocation(2,:),'m-','LineWidth',2.0); hold on; grid on; axis equal;
+
+
+h_plot = figure;
+plot(roninLocation(1,:),roninLocation(2,:),'k-','LineWidth',2.0); hold on; grid on; axis equal;
+for k = 1:numRonin
+    
+    plot(roninLocation(1,1:k), roninLocation(2,1:k),'m-','LineWidth',1.5);
+    pause(0.01); refresh(h_plot);
+    
+    % save images
+    % saveImg = getframe(h_plot);
+    % imwrite(saveImg.cdata , sprintf('figures/%06d.png', k));
+end
 
 
 
