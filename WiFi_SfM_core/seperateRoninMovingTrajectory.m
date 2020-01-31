@@ -15,7 +15,7 @@ for k = 1:numRonin
         nonstationarySegmentIndex = [nonstationarySegmentIndex, k];
     else
         
-        % check start or end point of RoNIN moving motion
+        % check end point of RoNIN moving motion
         if (isempty(nonstationarySegmentIndex))
             continue;
         else
@@ -44,7 +44,7 @@ for k = 1:numNonstationarySegment
         roninMovingTrajectoryIndex{numMovingTrajectory} = nonstationaryIndex;
     end
 end
-roninMovingTrajectoryIndex((numNonstationarySegment+1):end) = [];
+roninMovingTrajectoryIndex((numMovingTrajectory+1):end) = [];
 
 
 end
