@@ -40,8 +40,8 @@ roninLineSegment = [roninResult(lineSegmentIndex).location];
 
 % plot RoNIN 2D trajectory
 figure;
-plot(roninLocation(1,:),roninLocation(2,:),'k-','LineWidth',2.0); hold on; grid on; axis equal;
-plot(roninLineSegment(1,:),roninLineSegment(2,:),'m-','LineWidth',2.0);
+plot(roninLocation(1,:),roninLocation(2,:),'k-','LineWidth',1.0); hold on; grid on; axis equal;
+plot(roninLineSegment(1,:),roninLineSegment(2,:),'m-','LineWidth',2.5);
 set(gcf,'Units','pixels','Position',[900 300 800 600]);  % modify figure
 
 
