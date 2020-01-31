@@ -9,14 +9,41 @@ addpath('devkit_KITTI_GPS');
 
 %% preprocessing RoNIN data
 
-%
+% dataset path and upsampling parameter for RoNIN
 datasetDirectory = 'G:/Smartphone_Dataset/4_WiFi_SfM/Asus_Tango/SFU_TASC1_8000/20200114112923R_WiFi_SfM';
 roninInterval = 200;          % 1 Hz
 roninYawRotation = 190;   % degree
 
 
 % extract RoNIN centric data
-roninResult = extractRoninCentricData(datasetDirectory, roninInterval, roninYawRotation);
+roninResult = extractRoninDataOnly(datasetDirectory, roninInterval, roninYawRotation);
+
+
+% detect and remove RoNIN stationary motion
+speed = 0.1;             % m/s
+duration = 5.0;          % sec
+roninResult = detectStationaryMotion(roninResult, speed, duration);
+roninResult = removeStationaryMotion(roninResult);
+
+
+% separate RoNIN moving trajectory
+displacement = 3.0;    % m
+movingTrajectoryIndex = seperateRoninMovingTrajectory(roninResult, displacement);
+
+
+
+
+
+
+
+
+
+
+
+
+%%
+
+
 
 
 % convert RoNIN polar coordinate for nonlinear optimization

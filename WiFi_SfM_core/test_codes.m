@@ -2,7 +2,6 @@
 
 
 
-
 %% analyze the RoNIN trajectory
 
 
@@ -17,12 +16,65 @@ h_plot = figure;
 plot(roninLocation(1,:),roninLocation(2,:),'k-','LineWidth',2.0); hold on; grid on; axis equal;
 for k = 1:numRonin
     
-    plot(roninLocation(1,1:k), roninLocation(2,1:k),'m-','LineWidth',1.5);
-    pause(0.01); refresh(h_plot);
+    plot(roninLocation(1,1:k), roninLocation(2,1:k),'m-','LineWidth',3.0);
+    pause(0.1); refresh(h_plot);
     
     % save images
     % saveImg = getframe(h_plot);
     % imwrite(saveImg.cdata , sprintf('figures/%06d.png', k));
+end
+
+
+% vectorize RoNIN result for visualization
+roninTime = [roninResult(:).timestamp];
+roninLocation = [roninResult(:).location];
+roninSpeed = [roninResult(:).speed];
+roninOdometer = [roninResult(:).odometer];
+
+dataWindowSize = 60;
+
+% create figure frame for making video
+h_RoNIN = figure(10);
+set(h_RoNIN,'Color',[1 1 1]);
+set(h_RoNIN,'Units','pixels','Position',[100 50 1800 900]);
+ha1 = axes('Position',[0.04,0.06 , 0.50,0.90]); % [x_start, y_start, x_width, y_width]
+ha2 = axes('Position',[0.58,0.56 , 0.40,0.40]); % [x_start, y_start, x_width, y_width]
+ha3 = axes('Position',[0.58,0.06 , 0.40,0.40]); % [x_start, y_start, x_width, y_width]
+
+for k = 16390:1:numRonin
+    %%
+    
+    k
+    
+%     if (roninResult(k).isStationary)
+%         continue;
+%     end
+    
+    axes(ha1); cla;
+    plot(roninLocation(1,:),roninLocation(2,:),'k-','LineWidth',1.0); hold on; grid on; axis equal;
+    plot(roninLocation(1,1:k),roninLocation(2,1:k),'m-','LineWidth',2.0);
+    plot(roninLocation(1,k),roninLocation(2,k),'bd','LineWidth',5);
+    xlabel('x [m]','fontsize',15); ylabel('y [m]','fontsize',15);
+    
+    
+    %%
+    
+    axes(ha2); cla;
+    plot(roninSpeed((k-dataWindowSize):k),'m-','LineWidth',2.0); hold on; grid on; axis tight;
+    plot(61, roninSpeed(k),'bd','LineWidth',5);
+    ylabel('speed [m/s]','fontsize',15); ylim([0 1.2])
+    
+    %%
+    
+    axes(ha3); cla;
+    plot(roninOdometer((k-dataWindowSize):k),'m-','LineWidth',2.0); hold on; grid on; axis tight;
+    plot(61, roninOdometer(k),'bd','LineWidth',5);   
+    ylabel('odometer [m]','fontsize',15);
+    
+    
+    % save images
+    pause(0.1); refresh;
+    saveImg = getframe(h_RoNIN);
 end
 
 

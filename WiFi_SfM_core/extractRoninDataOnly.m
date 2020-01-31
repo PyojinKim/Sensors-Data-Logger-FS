@@ -1,15 +1,8 @@
 function [roninResult] = extractRoninDataOnly(datasetDirectory, roninInterval, roninYawRotation)
 
-% parse ronin.txt file
+% parse ronin.txt file / compute RoNIN velocity and speed
 roninResult = parseRoninTextFile([datasetDirectory '/ronin.txt'], roninInterval, roninYawRotation);
 roninResult = computeRoninVelocity(roninResult);
-
-
-% detect and remove RoNIN stationary motion
-speed = 0.1;      % m/s
-duration = 5.0;   % sec
-roninResult = detectStationaryMotion(roninResult, speed, duration);
-roninResult = removeStationaryMotion(roninResult);
 numRonin = size(roninResult,2);
 
 
