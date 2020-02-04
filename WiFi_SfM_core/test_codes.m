@@ -2,6 +2,50 @@
 
 
 
+k = 3;
+
+
+% extract RoNIN part
+roninPartialResult = roninResult(stationaryPointMap(k).index);
+
+roninLocation = [roninResult(:).location];
+roninSegment = [roninPartialResult(:).location];
+roninFLPLocation = [roninPartialResult(:).FLPLocation];
+
+
+% plot RoNIN 2D trajectory
+figure;
+plot(roninLocation(1,:),roninLocation(2,:),'k-','LineWidth',1.0); hold on; grid on; axis equal;
+plot(roninSegment(1,:),roninSegment(2,:),'md','LineWidth',2.5);
+set(gcf,'Units','pixels','Position',[900 300 800 600]);  % modify figure
+
+
+% plot horizontal position (latitude / longitude) trajectory on Google map
+figure;
+plot(roninFLPLocation(2,:), roninFLPLocation(1,:), 'b*-', 'LineWidth', 1); hold on;
+plot_google_map('maptype', 'roadmap', 'APIKey', 'AIzaSyB_uD1rGjX6MJkoQgSDyjHkbdu-b-_5Bjg');
+axis([-122.9151 -122.9133   49.2762   49.2773]);
+set(get(gcf,'CurrentAxes'),'FontName','Times New Roman','FontSize',15);
+xlabel('Longitude [deg]','FontName','Times New Roman','FontSize',15);
+ylabel('Latitude [deg]','FontName','Times New Roman','FontSize',15);
+set(gcf,'Units','pixels','Position',[900 300 800 600]);  % modify figure
+
+
+
+
+roninLocation = [roninResult(:).location];
+roninLineSegment = [roninResult(mapIndex3).location];
+
+% plot RoNIN 2D trajectory
+figure;
+plot(roninLocation(1,:),roninLocation(2,:),'k-','LineWidth',1.0); hold on; grid on; axis equal;
+plot(roninLineSegment(1,:),roninLineSegment(2,:),'dm','LineWidth',2.5);
+set(gcf,'Units','pixels','Position',[900 300 800 600]);  % modify figure
+
+
+
+
+
 %% analyze the RoNIN trajectory
 
 

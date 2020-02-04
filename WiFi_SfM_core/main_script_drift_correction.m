@@ -39,11 +39,12 @@ stationaryPointMap = constructStationaryMap(stationaryPoint, rewardThreshold);
 
 
 %
+roninMovingPart = extractRoninMovingTrajectory(roninResult, movingTrajectoryIndex, stationaryPointMap);
 
 
-
-
-
+mapIndex1 = find([roninResult(:).stationaryPointIndex] == 1);
+mapIndex2 = find([roninResult(:).stationaryPointIndex] == 2);
+mapIndex3 = find([roninResult(:).stationaryPointIndex] == 3);
 
 
 
@@ -57,7 +58,7 @@ stationaryPointMap = constructStationaryMap(stationaryPoint, rewardThreshold);
 roninPolarResult = convertRoninPolarCoordinate(roninResult);
 roninInitialLocation = roninPolarResult(1).location;
 roninPolarSpeed = [roninPolarResult(:).speed];
-roninPolarDeltaAngle = [roninPolarResult(:).deltaAngle];
+roninPolarAngle = [roninPolarResult(:).angle];
 
 
 % scale and bias model parameters for RoNIN drift correction
@@ -65,7 +66,7 @@ numRonin = size(roninPolarResult,2);
 roninScale = ones(1,numRonin);
 roninBias = zeros(1,numRonin);
 X_initial = [roninScale, roninBias];
-roninLocation = DriftCorrectedRoninPolarModel(roninInitialLocation, roninPolarSpeed, roninPolarDeltaAngle, X_initial);
+roninLocation = DriftCorrectedRoninAbsoluteAngleModel(roninInitialLocation, roninPolarSpeed, roninPolarAngle, X_initial);
 
 
 % plot RoNIN 2D trajectory before nonlinear optimization
@@ -80,13 +81,13 @@ set(gcf,'Units','pixels','Position',[900 300 800 600]);  % modify figure
 
 % run nonlinear optimization using lsqnonlin in Matlab (Levenberg-Marquardt)
 options = optimoptions(@lsqnonlin,'Algorithm','levenberg-marquardt','Display','iter-detailed');
-[vec,resnorm,residuals,exitflag] = lsqnonlin(@(x) EuclideanDistanceResidual(roninInitialLocation, roninPolarSpeed, roninPolarDeltaAngle, x),X_initial,[],[],options);
+[vec,resnorm,residuals,exitflag] = lsqnonlin(@(x) EuclideanDistanceResidual(roninInitialLocation, roninPolarSpeed, roninPolarAngle, x),X_initial,[],[],options);
 
 
 % optimal scale and bias model parameters for RoNIN drift correction
 X_optimized = vec;
-roninResidual = EuclideanDistanceResidual(roninInitialLocation, roninPolarSpeed, roninPolarDeltaAngle, X_optimized);
-roninLocation = DriftCorrectedRoninPolarModel(roninInitialLocation, roninPolarSpeed, roninPolarDeltaAngle, X_optimized);
+roninResidual = EuclideanDistanceResidual(roninInitialLocation, roninPolarSpeed, roninPolarAngle, X_optimized);
+roninLocation = DriftCorrectedRoninAbsoluteAngleModel(roninInitialLocation, roninPolarSpeed, roninPolarAngle, X_optimized);
 
 
 % plot RoNIN 2D trajectory after nonlinear optimization
