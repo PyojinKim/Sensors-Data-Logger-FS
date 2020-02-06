@@ -155,9 +155,111 @@ for iteration = 1:numIterations
 end
 
 
+%% Evaluate the Accuracy of the Network
+
+url = 'https://github.com/brendenlake/omniglot/raw/master/python/images_evaluation.zip';
+downloadFolder = tempdir;
+filename = fullfile(downloadFolder,'images_evaluation.zip');
+
+testingSetFolder = fullfile(downloadFolder,'images_evaluation');
+if (~exist(testingSetFolder,'dir'))
+    disp('Downloading Omniglot test data (3.2 MB)...')
+    websave(filename,url);
+    unzip(filename,downloadFolder);
+end
+disp("Test data downloaded.")
+
+%
+imdsTest = omniglotImageDatastore(testingSetFolder);
+numClasses = numel(unique(imdsTest.Labels));
 
 
+% evaluate the network predictions and calculate the average accuracy over the minibatches
+accuracy = zeros(1,5);
+accuracyBatchSize = 150;
+for i = 1:5
+    
+    % Extract mini-batch of image pairs and pair labels
+    [XAcc1,XAcc2,pairLabelsAcc] = getSiameseBatch(imdsTest,accuracyBatchSize);
+    
+    % Convert mini-batch of data to dlarray. Specify the dimension labels
+    % 'SSCB' (spatial, spatial, channel, batch) for image data.
+    dlXAcc1 = dlarray(single(XAcc1),'SSCB');
+    dlXAcc2 = dlarray(single(XAcc2),'SSCB');
+    
+    % If using a GPU, then convert data to gpuArray.
+    if (executionEnvironment == "auto" && canUseGPU) || executionEnvironment == "gpu"
+        dlXAcc1 = gpuArray(dlXAcc1);
+        dlXAcc2 = gpuArray(dlXAcc2);
+    end
+    
+    % Evaluate predictions using trained network
+    dlY = predictSiamese(dlnet,fcParams,dlXAcc1,dlXAcc2);
+    
+    % Convert predictions to binary 0 or 1
+    Y = gather(extractdata(dlY));
+    Y = round(Y);
+    
+    % Compute average accuracye for the minibatch
+    accuracy(i) = sum(Y == pairLabelsAcc)/accuracyBatchSize;
+end
+
+% Compute accuracy over all minibatches
+averageAccuracy = mean(accuracy)*100
 
 
+%% Display a Test Set of Images with Predictions
+
+testBatchSize = 10;
+[XTest1,XTest2,pairLabelsTest] = getSiameseBatch(imdsTest,testBatchSize);
+
+% Convert test batch of data to dlarray. Specify the dimension labels
+% 'SSCB' (spatial, spatial, channel, batch) for image data and 'CB'
+% (channel, batch) for labels
+dlXTest1 = dlarray(single(XTest1),'SSCB');
+dlXTest2 = dlarray(single(XTest2),'SSCB');
+
+% If using a GPU, then convert data to gpuArray
+if (executionEnvironment == "auto" && canUseGPU) || executionEnvironment == "gpu"
+    dlXTest1 = gpuArray(dlXTest1);
+    dlXTest2 = gpuArray(dlXTest2);
+end
+
+% Calculate the predicted probability
+dlYScore = predictSiamese(dlnet,fcParams,dlXTest1,dlXTest2);
+YScore = gather(extractdata(dlYScore));
+
+% Convert predictions to binary 0 or 1
+YPred = round(YScore);
+
+% Extract data to plot
+XTest1 = extractdata(dlXTest1);
+XTest2 = extractdata(dlXTest2);
+
+% Plot images with predicted label and predicted score
+testingPlot = figure;
+testingPlot.Position(3) = plotRatio*testingPlot.Position(4);
+testingPlot.Visible = 'on';
+
+for i = 1:numel(pairLabelsTest)
+    
+    if YPred(i) == 1
+        predLabel = "similar";
+    else
+        predLabel = "dissimilar" ;
+    end
+    
+    if pairLabelsTest(i) == YPred(i)
+        testStr = "\bf\color{darkgreen}Correct\rm\newline";
+        
+    else
+        testStr = "\bf\color{red}Incorrect\rm\newline";
+    end
+    
+    subplot(2,5,i)
+    imshow([XTest1(:,:,:,i) XTest2(:,:,:,i)]);
+    
+    title(testStr + "\color{black}Predicted: " + predLabel + "\newlineScore: " + YScore(i));
+end
 
 
