@@ -16,7 +16,7 @@ roninYawRotation = 190;   % degree
 
 
 % extract RoNIN centric data
-roninResult = extractRoninDataOnly(datasetDirectory, roninInterval, roninYawRotation);
+roninResult = extractRoninOnlyData(datasetDirectory, roninInterval, roninYawRotation);
 
 
 % detect and remove RoNIN stationary motion
@@ -38,24 +38,22 @@ stationaryPoint = extractRoninStationaryPoint(roninResult, stationaryPointIndex,
 stationaryPointMap = constructStationaryMap(stationaryPoint, rewardThreshold);
 
 
-%
+% extract RoNIN moving trajectory from RoNIN result
 roninMovingPart = extractRoninMovingTrajectory(roninResult, movingTrajectoryIndex, stationaryPointMap);
+numStationaryPointMap = size(stationaryPointMap,2);
+roninStationaryPointIndex = cell(1,numStationaryPointMap);
+for k = 1:numStationaryPointMap
+    roninStationaryPointIndex{k} = find([roninMovingPart(:).stationaryPointIndex] == k);
+end
 
 
-mapIndex1 = find([roninResult(:).stationaryPointIndex] == 1);
-mapIndex2 = find([roninResult(:).stationaryPointIndex] == 2);
-mapIndex3 = find([roninResult(:).stationaryPointIndex] == 3);
-
-
-
+%
 
 %%
 
 
-
-
 % convert RoNIN polar coordinate for nonlinear optimization
-roninPolarResult = convertRoninPolarCoordinate(roninResult);
+roninPolarResult = convertRoninPolarCoordinate(roninMovingPart);
 roninInitialLocation = roninPolarResult(1).location;
 roninPolarSpeed = [roninPolarResult(:).speed];
 roninPolarAngle = [roninPolarResult(:).angle];
@@ -81,12 +79,12 @@ set(gcf,'Units','pixels','Position',[900 300 800 600]);  % modify figure
 
 % run nonlinear optimization using lsqnonlin in Matlab (Levenberg-Marquardt)
 options = optimoptions(@lsqnonlin,'Algorithm','levenberg-marquardt','Display','iter-detailed');
-[vec,resnorm,residuals,exitflag] = lsqnonlin(@(x) EuclideanDistanceResidual(roninInitialLocation, roninPolarSpeed, roninPolarAngle, x),X_initial,[],[],options);
+[vec,resnorm,residuals,exitflag] = lsqnonlin(@(x) EuclideanDistanceResidual(roninInitialLocation, roninPolarSpeed, roninPolarAngle, roninStationaryPointIndex, x),X_initial,[],[],options);
 
 
 % optimal scale and bias model parameters for RoNIN drift correction
 X_optimized = vec;
-roninResidual = EuclideanDistanceResidual(roninInitialLocation, roninPolarSpeed, roninPolarAngle, X_optimized);
+roninResidual = EuclideanDistanceResidual(roninInitialLocation, roninPolarSpeed, roninPolarAngle, roninStationaryPointIndex, X_optimized);
 roninLocation = DriftCorrectedRoninAbsoluteAngleModel(roninInitialLocation, roninPolarSpeed, roninPolarAngle, X_optimized);
 
 

@@ -1,4 +1,4 @@
-function [roninResult] = extractRoninDataOnly(datasetDirectory, roninInterval, roninYawRotation)
+function [roninResult] = extractRoninOnlyData(datasetDirectory, roninInterval, roninYawRotation)
 
 % parse ronin.txt file / compute RoNIN velocity and speed
 roninResult = parseRoninTextFile([datasetDirectory '/ronin.txt'], roninInterval, roninYawRotation);

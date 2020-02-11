@@ -29,9 +29,28 @@ for k = 1:numStationaryPoint
     wifiScanRSSI = max([wifiScanResult(:).RSSI],[],2);
     
     
+    % Google FLP construction
+    GoogleFLPResult = struct('timestamp', cell(1,numRoninPartial));
+    numGoogleFLP = 0;
+    for m = 1:numRoninPartial
+        if (isempty(roninPartialResult(m).FLPLocation))
+            continue;
+        else
+            if (roninPartialResult(m).FLPAccuracy < 20.0)
+                numGoogleFLP = numGoogleFLP + 1;
+                GoogleFLPResult(numGoogleFLP).timestamp = roninPartialResult(m).timestamp;
+                GoogleFLPResult(numGoogleFLP).FLPLocation = roninPartialResult(m).FLPLocation;
+                GoogleFLPResult(numGoogleFLP).FLPAccuracy = roninPartialResult(m).FLPAccuracy;
+            end
+        end
+    end
+    GoogleFLPResult((numGoogleFLP+1):end) = [];
+    
+    
     % save RoNIN index and WiFi RSSI vector
     stationaryPoint(k).index = [stationaryIndex(1), stationaryIndex(end)];
     stationaryPoint(k).wifiScanRSSI = wifiScanRSSI;
+    stationaryPoint(k).GoogleFLP = GoogleFLPResult;
 end
 
 

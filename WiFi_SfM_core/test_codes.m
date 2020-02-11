@@ -1,6 +1,33 @@
 
+roninLineSegment = [roninMovingPart(roninStationaryPointIndex{1}).location];
+plot(roninLineSegment(1,:),roninLineSegment(2,:),'rd','LineWidth',2.5);
 
 
+
+roninLineSegment = [roninMovingPart(roninStationaryPointIndex{2}).location];
+plot(roninLineSegment(1,:),roninLineSegment(2,:),'kd','LineWidth',2.5);
+
+
+
+roninLineSegment = [roninMovingPart(roninStationaryPointIndex{3}).location];
+plot(roninLineSegment(1,:),roninLineSegment(2,:),'bd','LineWidth',2.5);
+
+
+%%
+
+roninLineSegment = [roninLocation(:,roninStationaryPointIndex{1})];
+plot(roninLineSegment(1,:),roninLineSegment(2,:),'rd','LineWidth',2.5);
+
+
+roninLineSegment = [roninLocation(:,roninStationaryPointIndex{2})];
+plot(roninLineSegment(1,:),roninLineSegment(2,:),'kd','LineWidth',2.5);
+
+
+roninLineSegment = [roninLocation(:,roninStationaryPointIndex{3})];
+plot(roninLineSegment(1,:),roninLineSegment(2,:),'bd','LineWidth',2.5);
+
+
+%%
 
 k = 3;
 
@@ -42,6 +69,56 @@ plot(roninLocation(1,:),roninLocation(2,:),'k-','LineWidth',1.0); hold on; grid 
 plot(roninLineSegment(1,:),roninLineSegment(2,:),'dm','LineWidth',2.5);
 set(gcf,'Units','pixels','Position',[900 300 800 600]);  % modify figure
 
+
+
+
+%%
+
+
+% convert RoNIN polar coordinate for nonlinear optimization
+roninPolarResult = convertRoninPolarCoordinate(roninMovingPart);
+roninInitialLocation = roninPolarResult(1).location;
+roninPolarSpeed = [roninPolarResult(:).speed];
+roninPolarDeltaAngle = [roninPolarResult(:).deltaAngle];
+
+
+% scale and bias model parameters for RoNIN drift correction
+numRonin = size(roninPolarResult,2);
+roninScale = ones(1,numRonin);
+roninBias = zeros(1,numRonin);
+X_initial = [roninScale, roninBias];
+roninLocation = DriftCorrectedRoninDeltaAngleModel(roninInitialLocation, roninPolarSpeed, roninPolarDeltaAngle, X_initial);
+
+
+% plot RoNIN 2D trajectory before nonlinear optimization
+figure;
+plot(roninLocation(1,:),roninLocation(2,:),'m-','LineWidth',2.0); hold on; grid on; axis equal;
+set(get(gcf,'CurrentAxes'),'FontName','Times New Roman','FontSize',15);
+xlabel('X [m]','FontName','Times New Roman','FontSize',15);
+ylabel('Y [m]','FontName','Times New Roman','FontSize',15);
+title('Before Optimization','FontName','Times New Roman','FontSize',15);
+set(gcf,'Units','pixels','Position',[900 300 800 600]);  % modify figure
+
+
+% run nonlinear optimization using lsqnonlin in Matlab (Levenberg-Marquardt)
+options = optimoptions(@lsqnonlin,'Algorithm','levenberg-marquardt','Display','iter-detailed');
+[vec,resnorm,residuals,exitflag] = lsqnonlin(@(x) EuclideanDistanceResidual(roninInitialLocation, roninPolarSpeed, roninPolarDeltaAngle, x),X_initial,[],[],options);
+
+
+% optimal scale and bias model parameters for RoNIN drift correction
+X_optimized = vec;
+roninResidual = EuclideanDistanceResidual(roninInitialLocation, roninPolarSpeed, roninPolarDeltaAngle, X_optimized);
+roninLocation = DriftCorrectedRoninDeltaAngleModel(roninInitialLocation, roninPolarSpeed, roninPolarDeltaAngle, X_optimized);
+
+
+% plot RoNIN 2D trajectory after nonlinear optimization
+figure;
+plot(roninLocation(1,:),roninLocation(2,:),'m-','LineWidth',2.0); hold on; grid on; axis equal;
+set(get(gcf,'CurrentAxes'),'FontName','Times New Roman','FontSize',15);
+xlabel('X [m]','FontName','Times New Roman','FontSize',15);
+ylabel('Y [m]','FontName','Times New Roman','FontSize',15);
+title('After Optimization','FontName','Times New Roman','FontSize',15);
+set(gcf,'Units','pixels','Position',[900 300 800 600]);  % modify figure
 
 
 
@@ -90,9 +167,9 @@ for k = 16390:1:numRonin
     
     k
     
-%     if (roninResult(k).isStationary)
-%         continue;
-%     end
+    %     if (roninResult(k).isStationary)
+    %         continue;
+    %     end
     
     axes(ha1); cla;
     plot(roninLocation(1,:),roninLocation(2,:),'k-','LineWidth',1.0); hold on; grid on; axis equal;
@@ -112,7 +189,7 @@ for k = 16390:1:numRonin
     
     axes(ha3); cla;
     plot(roninOdometer((k-dataWindowSize):k),'m-','LineWidth',2.0); hold on; grid on; axis tight;
-    plot(61, roninOdometer(k),'bd','LineWidth',5);   
+    plot(61, roninOdometer(k),'bd','LineWidth',5);
     ylabel('odometer [m]','fontsize',15);
     
     
@@ -280,5 +357,82 @@ for k = 17500:5:numRonin
     saveImg = getframe(h_RoNIN);
     
 end
+
+
+% datasetDirectory = 'G:/Smartphone_Dataset/4_WiFi_SfM/Asus_Tango/SFU_TASC1_8000/20200114112923R_WiFi_SfM';
+% roninYawRotation = 190;     % degree
+
+
+residuals(1) = norm(roninLocation(:,1) - roninLocation(:,149));
+residuals(2) = norm(roninLocation(:,149) - roninLocation(:,150));
+residuals(3) = norm(roninLocation(:,150) - roninLocation(:,284));
+residuals(4) = norm(roninLocation(:,284) - roninLocation(:,285));
+residuals(5) = norm(roninLocation(:,285) - roninLocation(:,501));
+
+residuals(6) = norm(roninLocation(:,58) - roninLocation(:,59));
+residuals(7) = norm(roninLocation(:,59) - roninLocation(:,83));
+residuals(8) = norm(roninLocation(:,83) - roninLocation(:,84));
+residuals(9) = norm(roninLocation(:,84) - roninLocation(:,442));
+residuals(10) = norm(roninLocation(:,442) - roninLocation(:,443));
+
+residuals(11) = norm(roninLocation(:,202) - roninLocation(:,203));
+
+
+% % 8002.2 office (origin)
+% residuals(1) = norm(roninLocation(:,1) - roninLocation(:,154));
+% residuals(2) = norm(roninLocation(:,1) - roninLocation(:,155));
+% residuals(3) = norm(roninLocation(:,1) - roninLocation(:,287));
+% residuals(4) = norm(roninLocation(:,1) - roninLocation(:,300));
+% residuals(5) = norm(roninLocation(:,1) - roninLocation(:,332));
+% residuals(6) = norm(roninLocation(:,1) - roninLocation(:,567));
+% residuals(7) = norm(roninLocation(:,1) - roninLocation(:,570));
+%
+% % TASC1 corners
+% residuals(8) = norm(roninLocation(:,20) - roninLocation(:,136));
+% residuals(9) = norm(roninLocation(:,136) - roninLocation(:,347));
+% residuals(10) = norm(roninLocation(:,347) - roninLocation(:,555));
+% residuals(11) = norm(roninLocation(:,555) - roninLocation(:,169));
+%
+% residuals(12) = norm(roninLocation(:,173) - roninLocation(:,250));
+% residuals(13) = norm(roninLocation(:,414) - roninLocation(:,431));
+% residuals(14) = norm(roninLocation(:,179) - roninLocation(:,242));
+% residuals(15) = norm(roninLocation(:,205) - roninLocation(:,210));
+% residuals(16) = norm(roninLocation(:,94) - roninLocation(:,479));
+% residuals(17) = norm(roninLocation(:,479) - roninLocation(:,525));
+% residuals(18) = norm(roninLocation(:,43) - roninLocation(:,531));
+
+
+%%
+% datasetDirectory = 'G:/Smartphone_Dataset/4_WiFi_SfM/Prof_Yasu/20200109090901R_WiFi_SfM';
+% roninYawRotation = 35;     % degree
+%
+%
+% % some corners
+% residuals(1) = norm(roninLocation(:,237) - roninLocation(:,1080));
+% residuals(2) = norm(roninLocation(:,325) - roninLocation(:,950));
+% residuals(3) = norm(roninLocation(:,420) - roninLocation(:,815));
+
+
+%%
+% datasetDirectory = 'G:/Smartphone_Dataset/4_WiFi_SfM/Asus_Tango/SFU_TASC1_8000/20200113110654R_WiFi_SfM';
+% roninYawRotation = 225;   % degree
+%
+%
+% % 8002.2 office (origin)
+% residuals(1) = norm(roninLocation(:,1) - roninLocation(:,256));
+% residuals(2) = norm(roninLocation(:,1) - roninLocation(:,1024));
+% residuals(3) = norm(roninLocation(:,1) - roninLocation(:,1194));
+%
+% % ASB corners
+% residuals(4) = norm(roninLocation(:,405) - roninLocation(:,874));
+% residuals(5) = norm(roninLocation(:,526) - roninLocation(:,753));
+%
+% % TASC1 corners
+% residuals(6) = norm(roninLocation(:,291) - roninLocation(:,975));
+% residuals(7) = norm(roninLocation(:,975) - roninLocation(:,1073));
+% residuals(8) = norm(roninLocation(:,1073) - roninLocation(:,1131));
+%
+% residuals(9) = norm(roninLocation(:,18) - roninLocation(:,1046));
+% residuals(10) = norm(roninLocation(:,1046) - roninLocation(:,1155));
 
 
