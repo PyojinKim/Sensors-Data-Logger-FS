@@ -102,12 +102,14 @@ set(gcf,'Units','pixels','Position',[900 300 800 600]);  % modify figure
 
 % run nonlinear optimization using lsqnonlin in Matlab (Levenberg-Marquardt)
 options = optimoptions(@lsqnonlin,'Algorithm','levenberg-marquardt','Display','iter-detailed');
-[vec,resnorm,residuals,exitflag] = lsqnonlin(@(x) EuclideanDistanceResidual(roninInitialLocation, roninPolarSpeed, roninPolarDeltaAngle, x),X_initial,[],[],options);
+tic
+[vec,resnorm,residuals,exitflag] = lsqnonlin(@(x) EuclideanDistanceResidual_DeltaAngle(roninInitialLocation, roninPolarSpeed, roninPolarDeltaAngle, roninStationaryPointIndex, x),X_initial,[],[],options);
+toc
 
 
 % optimal scale and bias model parameters for RoNIN drift correction
 X_optimized = vec;
-roninResidual = EuclideanDistanceResidual(roninInitialLocation, roninPolarSpeed, roninPolarDeltaAngle, X_optimized);
+roninResidual = EuclideanDistanceResidual_DeltaAngle(roninInitialLocation, roninPolarSpeed, roninPolarDeltaAngle, roninStationaryPointIndex, X_optimized);
 roninLocation = DriftCorrectedRoninDeltaAngleModel(roninInitialLocation, roninPolarSpeed, roninPolarDeltaAngle, X_optimized);
 
 
@@ -120,6 +122,32 @@ ylabel('Y [m]','FontName','Times New Roman','FontSize',15);
 title('After Optimization','FontName','Times New Roman','FontSize',15);
 set(gcf,'Units','pixels','Position',[900 300 800 600]);  % modify figure
 
+
+roninScaleInitial = X_initial(1:numRonin);
+roninBiasInitial = X_initial((numRonin+1):end);
+
+roninScaleOptimal = X_optimized(1:numRonin);
+roninBiasOptimal = X_optimized((numRonin+1):end);
+
+
+% plot scale and bias model parameters for RoNIN drift correction
+figure;
+subplot(2,1,1);
+h_initial = plot(roninScaleInitial,'k','LineWidth',1.5); hold on; grid on;
+h_optimal = plot(roninScaleOptimal,'m','LineWidth',1.5); axis tight;
+set(gcf,'color','w'); hold off;
+set(get(gcf,'CurrentAxes'),'FontName','Times New Roman','FontSize',17);
+xlabel('Scale Model Parameter Index','FontName','Times New Roman','FontSize',17);
+ylabel('Scale','FontName','Times New Roman','FontSize',17);
+legend('Initial','Optimal');
+subplot(2,1,2);
+plot(roninBiasInitial,'k','LineWidth',1.5); hold on; grid on;
+plot(roninBiasOptimal,'m','LineWidth',1.5); axis tight;
+set(gcf,'color','w'); hold off;
+set(get(gcf,'CurrentAxes'),'FontName','Times New Roman','FontSize',17);
+xlabel('Bias Model Parameter Index','FontName','Times New Roman','FontSize',17);
+ylabel('Bias','FontName','Times New Roman','FontSize',17);
+set(gcf,'Units','pixels','Position',[900 300 800 600]);  % modify figure
 
 
 
