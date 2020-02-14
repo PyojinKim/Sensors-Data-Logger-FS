@@ -7,23 +7,66 @@ dbstop if error;
 addpath('devkit_KITTI_GPS');
 
 
-%% preprocessing RoNIN data
+%% 1) read RoNIN data
 
-% dataset path and upsampling parameter for RoNIN
-datasetDirectory = 'G:/Smartphone_Dataset/4_WiFi_SfM/Asus_Tango/SFU_TASC1_8000/20200114112923R_WiFi_SfM';
-roninInterval = 200;          % 1 Hz
-roninYawRotation = 190;   % degree
-
-
-% extract RoNIN centric data
-roninResult = extractRoninOnlyData(datasetDirectory, roninInterval, roninYawRotation);
+% load dataset lists
+expCase = 1;
+setupParams_WiFi_SfM;
+datasetList = loadDatasetList(datasetPath);
 
 
-% detect and remove RoNIN stationary motion
-speed = 0.1;             % m/s
-duration = 5.0;          % sec
-roninResult = detectStationaryMotion(roninResult, speed, duration);
-roninResult = removeStationaryMotion(roninResult);
+% load unique WiFi RSSID Map
+load([datasetPath '/uniqueWiFiAPsBSSID.mat']);
+
+
+% load multiple RoNIN results
+numDatasetList = size(datasetList,1);
+datasetRoninResult = cell(1,numDatasetList);
+for k = 1:numDatasetList
+    
+    % read manual alignment result
+    expCase = k;
+    setupParams_alignment_SFU_TASC1_8000;
+    R = angle2rotmtx([0;0;(deg2rad(yaw))]);
+    t = [tx; ty];
+    
+    % extract RoNIN data
+    roninResult = extractRoninOnlyData(datasetDirectory, roninInterval, roninYawRotation);
+    for m = 1:size(roninResult,2)
+        roninResult(m).location = R(1:2,1:2) * roninResult(m).location + t;
+        roninResult(m).datasetIndex = k;
+    end
+    
+    % detect and remove RoNIN stationary motion
+    speed = 0.1;             % m/s
+    duration = 5.0;          % sec
+    roninResult = detectStationaryMotion(roninResult, speed, duration);
+    roninResult = removeStationaryMotion(roninResult);
+    
+    % save RoNIN result
+    datasetRoninResult{k} = roninResult;
+end
+
+
+% plot multiple RoNIN 2D trajectory
+distinguishableColors = distinguishable_colors(numDatasetList);
+figure; hold on; grid on; axis equal;
+for k = 1:numDatasetList
+    roninResult = datasetRoninResult{k};
+    roninLocation = [roninResult(:).location];
+    plot(roninLocation(1,:),roninLocation(2,:),'color',distinguishableColors(k,:),'LineWidth',2.5);
+end
+xlabel('x [m]','fontsize',10); ylabel('y [m]','fontsize',10); hold off;
+set(gcf,'Units','pixels','Position',[900 300 800 600]);  % modify figure
+
+
+%% 2) identify RoNIN moving/stationary points
+
+% concatenate RoNIN results
+roninResult = [];
+for k = 1:numDatasetList
+    roninResult = [roninResult, datasetRoninResult{k}];
+end
 
 
 % separate RoNIN moving trajectory and stationary point
@@ -33,7 +76,7 @@ stationaryPointIndex = seperateRoninStationaryPoint(roninResult, movingTrajector
 
 
 % construct stationary points map
-rewardThreshold = 0.4;
+rewardThreshold = 0.25;
 stationaryPoint = extractRoninStationaryPoint(roninResult, stationaryPointIndex, uniqueWiFiAPsBSSID);
 stationaryPointMap = constructStationaryMap(stationaryPoint, rewardThreshold);
 
@@ -47,10 +90,19 @@ for k = 1:numStationaryPointMap
 end
 
 
-%
+% plot RoNIN 2D trajectory with stationary points
+distinguishableColors = distinguishable_colors(numStationaryPointMap);
+roninLocation = [roninMovingPart(:).location];
+figure;
+plot(roninLocation(1,:),roninLocation(2,:),'m-','LineWidth',2.0); hold on; grid on; axis equal;
+for k = 1:numStationaryPointMap
+    roninStationaryLocation = [roninLocation(:,roninStationaryPointIndex{k})];
+    plot(roninStationaryLocation(1,:),roninStationaryLocation(2,:),'d','color',distinguishableColors(k,:),'LineWidth',2.5);
+end
+set(gcf,'Units','pixels','Position',[900 300 800 600]);  % modify figure
 
-%%
 
+%% 3) optimization with RoNIN stationary points
 
 % convert RoNIN polar coordinate for nonlinear optimization
 roninPolarResult = convertRoninPolarCoordinate(roninMovingPart);

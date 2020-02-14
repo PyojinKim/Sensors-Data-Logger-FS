@@ -1,30 +1,41 @@
 
-roninLineSegment = [roninMovingPart(roninStationaryPointIndex{1}).location];
-plot(roninLineSegment(1,:),roninLineSegment(2,:),'rd','LineWidth',2.5);
+
+%
+roninDatasetIndex = cell(1,numDatasetList);
+for k = 1:numDatasetList
+    roninDatasetIndex{k} = find([roninMovingPart(:).datasetIndex] == k);
+end
 
 
+% plot multiple RoNIN 2D trajectory
+distinguishableColors = distinguishable_colors(numDatasetList);
+figure; hold on; grid on; axis equal;
+for k = 1:numDatasetList
+    roninDatasetLocation = [roninLocation(:,roninDatasetIndex{k})];
+    plot(roninDatasetLocation(1,:),roninDatasetLocation(2,:),'color',distinguishableColors(k,:),'LineWidth',2.5);
+end
+xlabel('x [m]','fontsize',10); ylabel('y [m]','fontsize',10); hold off;
+set(gcf,'Units','pixels','Position',[900 300 800 600]);  % modify figure
 
-roninLineSegment = [roninMovingPart(roninStationaryPointIndex{2}).location];
-plot(roninLineSegment(1,:),roninLineSegment(2,:),'kd','LineWidth',2.5);
-
-
-
-roninLineSegment = [roninMovingPart(roninStationaryPointIndex{3}).location];
-plot(roninLineSegment(1,:),roninLineSegment(2,:),'bd','LineWidth',2.5);
 
 
 %%
 
-roninLineSegment = [roninLocation(:,roninStationaryPointIndex{1})];
-plot(roninLineSegment(1,:),roninLineSegment(2,:),'rd','LineWidth',2.5);
+% plot RoNIN 2D trajectory with stationary points
+distinguishableColors = distinguishable_colors(numDatasetList);
+roninLocation = [roninMovingPart(:).location];
 
 
-roninLineSegment = [roninLocation(:,roninStationaryPointIndex{2})];
-plot(roninLineSegment(1,:),roninLineSegment(2,:),'kd','LineWidth',2.5);
 
+figure;
+plot(roninLocation(1,:),roninLocation(2,:),'m-','LineWidth',2.0); hold on; grid on; axis equal;
 
-roninLineSegment = [roninLocation(:,roninStationaryPointIndex{3})];
-plot(roninLineSegment(1,:),roninLineSegment(2,:),'bd','LineWidth',2.5);
+k = 4
+roninDatasetLocation = [roninLocation(:,roninDatasetIndex{k})];
+plot(roninDatasetLocation(1,:),roninDatasetLocation(2,:),'d','color',distinguishableColors(k,:),'LineWidth',2.5);
+
+set(gcf,'Units','pixels','Position',[900 300 800 600]);  % modify figure
+
 
 
 %%

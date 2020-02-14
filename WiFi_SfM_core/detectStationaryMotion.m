@@ -33,5 +33,11 @@ for k = 1:numRonin
 end
 
 
+% heuristic (pre-defined) RoNIN stationary motion
+for k = 1:6
+    roninResult(k).isStationary = true;
+end
+
+
 end
 
