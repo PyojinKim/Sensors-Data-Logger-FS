@@ -1,5 +1,58 @@
 
 
+
+
+
+
+% re-package RoNIN data for figures
+roninLocation = [roninResult(:).location];
+roninFLPLocation = [roninResult(:).FLPLocation];
+
+
+% plot RoNIN 2D trajectory (left) & GPS trajectory on Google map (right)
+h_plot = figure;
+subplot(1,2,1);
+plot(roninLocation(1,:),roninLocation(2,:),'k-','LineWidth',1.5); hold on; grid on; axis equal; axis tight;
+xlabel('X [m]','FontName','Times New Roman','FontSize',15);
+ylabel('Y [m]','FontName','Times New Roman','FontSize',15);
+subplot(1,2,2);
+plot(roninFLPLocation(2,:), roninFLPLocation(1,:),'b*-','LineWidth',1.0); hold on;
+plot_google_map('maptype', 'roadmap', 'APIKey', 'AIzaSyB_uD1rGjX6MJkoQgSDyjHkbdu-b-_5Bjg');
+xlabel('Longitude [deg]','FontName','Times New Roman','FontSize',15);
+ylabel('Latitude [deg]','FontName','Times New Roman','FontSize',15);
+set(gcf,'Units','pixels','Position',[150 300 1700 600]);  % modify figure
+
+
+
+numRonin = size(roninResult,2);
+for k = 101:10:numRonin
+    
+    if (k >= 2)
+        delete(h_RoNIN);
+        delete(h_Google);
+    end
+    
+    
+    testIndex = [(k-100):k];
+    roninLocation = [roninResult(testIndex).location];
+    roninFLPLocation = [roninResult(testIndex).FLPLocation];
+    
+    
+    subplot(1,2,1);
+    h_RoNIN = plot(roninLocation(1,:),roninLocation(2,:),'m-','LineWidth',2.5);
+    
+    subplot(1,2,2);
+    h_Google = plot(roninFLPLocation(2,:), roninFLPLocation(1,:),'m-','LineWidth',2.0);
+    
+    title(sprintf('%05d',k));
+    
+    pause(0.1); refresh(h_plot);
+end
+
+
+
+%%
+
 %
 roninDatasetIndex = cell(1,numDatasetList);
 for k = 1:numDatasetList
@@ -16,7 +69,6 @@ for k = 1:numDatasetList
 end
 xlabel('x [m]','fontsize',10); ylabel('y [m]','fontsize',10); hold off;
 set(gcf,'Units','pixels','Position',[900 300 800 600]);  % modify figure
-
 
 
 %%

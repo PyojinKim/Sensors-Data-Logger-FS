@@ -1,4 +1,4 @@
-function [roninMovingTrajectoryIndex] = seperateRoninMovingTrajectory(roninResult, movingDistanceThreshold)
+function [roninMovingTrajectoryIndex] = seperateRoninMovingTrajectory(roninResult, movingDistanceThreshold, endtoEndDistanceThreshold)
 
 % common parameter setting for this function
 numRonin = size(roninResult,2);
@@ -37,9 +37,10 @@ for k = 1:numNonstationarySegment
     nonstationaryIndex = roninNonstationaryIndex{k};
     roninPartialResult = roninResult(nonstationaryIndex);
     
-    % check RoNIN moving distance
+    % check RoNIN moving/end to end distances
     movingDistance = computeRoninTravelingDistance(roninPartialResult);
-    if (movingDistance > movingDistanceThreshold)
+    endtoEndDistance = computeRoninEndtoEndDistance(roninPartialResult);
+    if ((movingDistance >= movingDistanceThreshold) && (endtoEndDistance >= endtoEndDistanceThreshold))
         numMovingTrajectory = numMovingTrajectory + 1;
         roninMovingTrajectoryIndex{numMovingTrajectory} = nonstationaryIndex;
     end
