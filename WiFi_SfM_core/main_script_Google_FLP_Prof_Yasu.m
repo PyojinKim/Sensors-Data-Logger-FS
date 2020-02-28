@@ -10,7 +10,7 @@ addpath('devkit_KITTI_GPS');
 %% 1) read RoNIN and Google FLP data
 
 
-numDatasetList = 11;
+numDatasetList = 14;
 datasetGoogleFLPResult = cell(1,numDatasetList);
 for k = 1:numDatasetList
     
@@ -48,8 +48,25 @@ for k = 1:numDatasetList
 end
 
 
+% convert lat/lon coordinates (deg) to mercator coordinates (m)
+scale = latToScale(datasetGoogleFLPResult{1}(1,1));
+latitude = datasetGoogleFLPResult{1}(1,1);
+longitude = datasetGoogleFLPResult{1}(2,1);
+[X_origin,Y_origin] = latlonToMercator(latitude, longitude, scale);
 
-% plot multiple Google FLP results
+datasetGoogleFLPMeterResult = cell(1,numDatasetList);
+for k = 1:numDatasetList
+    latitude = datasetGoogleFLPResult{k}(1,:);
+    longitude = datasetGoogleFLPResult{k}(2,:);
+    [X,Y] = latlonToMercator(latitude, longitude, scale);
+    
+    X = X - X_origin;
+    Y = Y - Y_origin;
+    datasetGoogleFLPMeterResult{k} = [X;Y];
+end
+
+
+% plot multiple Google FLP results on Google Map
 distinguishableColors = distinguishable_colors(numDatasetList);
 figure; hold on;
 for k = 1:numDatasetList
@@ -60,9 +77,41 @@ plot_google_map('maptype', 'roadmap', 'APIKey', 'AIzaSyB_uD1rGjX6MJkoQgSDyjHkbdu
 set(gcf,'Units','pixels','Position',[150 60 1700 900]);  % modify figure
 
 
+% plot multiple Google FLP results in meter
+figure; hold on; grid on; axis equal;
+for k = 1:numDatasetList
+    GoogleFLPMeterResult = datasetGoogleFLPMeterResult{k};
+    plot(GoogleFLPMeterResult(1,:), GoogleFLPMeterResult(2,:),'color',distinguishableColors(k,:),'LineWidth',2.5);
+end
+xlabel('X [m]','FontName','Times New Roman','FontSize',15);
+ylabel('Y [m]','FontName','Times New Roman','FontSize',15);
+set(gcf,'Units','pixels','Position',[150 60 1700 900]);  % modify figure
 
 
 
+% % remove invalid Google FLP data
+% for k = 1:numDatasetList
+%
+%     GoogleFLPMeterResult = datasetGoogleFLPMeterResult{k};
+%
+%     numGoogleFLP = size(GoogleFLPMeterResult,2);
+%     invalidIndex = [];
+%     temp = zeros(1,numGoogleFLP);
+%     for m = 2:numGoogleFLP
+%
+%
+%         temp(m) = norm(GoogleFLPMeterResult(:,m) - GoogleFLPMeterResult(:,m-1));
+%
+%     end
+%
+%     invalidIndex = (temp > 25.0);
+%
+%     GoogleFLPMeterResult(:,invalidIndex) = [];
+%
+%
+%
+%
+% end
 
 
 

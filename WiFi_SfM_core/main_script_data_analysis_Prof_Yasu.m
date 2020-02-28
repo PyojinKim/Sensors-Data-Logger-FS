@@ -10,7 +10,7 @@ addpath('devkit_KITTI_GPS');
 %% 1) select RoNIN recording data
 
 % extract RoNIN data
-expCase = 2;
+expCase = 1;
 setupParams_alignment_Prof_Yasu;
 roninResult = extractRoninOnlyData(datasetDirectory, roninInterval, roninYawRotation);
 
