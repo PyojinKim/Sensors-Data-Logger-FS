@@ -24,7 +24,7 @@ switch( expCase )
         roninYawRotation = 0;       % degree
         
         % valid RoNIN index after removing RoNIN stationary motion
-        validRoninIndex = 1:999999;
+        validRoninIndex = 1:8955;
         
     case 4
         datasetDirectory = 'G:/Smartphone_Dataset/4_WiFi_SfM/Prof_Yasu/20200124092153R_WiFi_SfM';
@@ -48,7 +48,7 @@ switch( expCase )
         roninYawRotation = 0;       % degree
         
         % valid RoNIN index after removing RoNIN stationary motion
-        validRoninIndex = 1:999999;
+        validRoninIndex = 1:7277;
         
     case 7
         datasetDirectory = 'G:/Smartphone_Dataset/4_WiFi_SfM/Prof_Yasu/20200130091304R_WiFi_SfM';
@@ -56,7 +56,7 @@ switch( expCase )
         roninYawRotation = 0;       % degree
         
         % valid RoNIN index after removing RoNIN stationary motion
-        validRoninIndex = 1:999999;
+        validRoninIndex = 1:7577;
         
     case 8
         datasetDirectory = 'G:/Smartphone_Dataset/4_WiFi_SfM/Prof_Yasu/20200131092145R_WiFi_SfM';
@@ -64,7 +64,7 @@ switch( expCase )
         roninYawRotation = 0;       % degree
         
         % valid RoNIN index after removing RoNIN stationary motion
-        validRoninIndex = 1:999999;
+        validRoninIndex = 1:4873;
         
     case 9
         datasetDirectory = 'G:/Smartphone_Dataset/4_WiFi_SfM/Prof_Yasu/20200205092720R_WiFi_SfM';
@@ -72,7 +72,7 @@ switch( expCase )
         roninYawRotation = 0;       % degree
         
         % valid RoNIN index after removing RoNIN stationary motion
-        validRoninIndex = 1:999999;
+        validRoninIndex = 1:4856;
         
     case 10
         datasetDirectory = 'G:/Smartphone_Dataset/4_WiFi_SfM/Prof_Yasu/20200206091600R_WiFi_SfM';
@@ -80,7 +80,7 @@ switch( expCase )
         roninYawRotation = 0;       % degree
         
         % valid RoNIN index after removing RoNIN stationary motion
-        validRoninIndex = 1:999999;
+        validRoninIndex = 1:11132;
         
     case 11
         datasetDirectory = 'G:/Smartphone_Dataset/4_WiFi_SfM/Prof_Yasu/20200207101556R_WiFi_SfM';
@@ -91,3 +91,9 @@ switch( expCase )
         validRoninIndex = 1:7675;
         
 end
+
+
+% The 1¢¶
+%
+% The 1
+
