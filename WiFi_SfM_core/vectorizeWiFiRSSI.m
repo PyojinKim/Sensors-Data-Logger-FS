@@ -17,6 +17,14 @@ for k = 1:numWiFiScan
     end
     
     
+    % if there is no WiFi scan information
+    if (isempty(tempWiFiAPsBSSID))
+        wifiScanRSSI(k).timestamp = NaN;
+        wifiScanRSSI(k).RSSI = NaN;
+        continue;
+    end
+    
+    
     % construct WiFi RSSI vector
     uniqueRSSIVector = -200 * ones(numUniqueBSSID,1);
     for m = 1:numUniqueBSSID

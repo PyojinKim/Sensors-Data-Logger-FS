@@ -1,36 +1,30 @@
-function [wifiScanResult] = extractWiFiCentricData(datasetDirectory, uniqueWiFiAPsBSSID, R, t)
+function [wifiScanResult] = extractWiFiCentricData(datasetDirectory, uniqueWiFiAPsBSSID)
 
 % parse wifi.txt file / vectorize WiFi RSSI for each WiFi scan
 wifiScanResult = parseWiFiTextFile([datasetDirectory '/wifi.txt']);
 wifiScanResult = vectorizeWiFiRSSI(wifiScanResult, uniqueWiFiAPsBSSID);
 wifiScanResult = filterWiFiRSSI(wifiScanResult, -100);
-
-
-% parse pose.txt file / transform to global inertial frame
-TangoPoseResult = parseTangoPoseTextFile([datasetDirectory '/pose.txt']);
-numPose = size(TangoPoseResult,2);
-for m = 1:numPose
-    transformedTangoPose = (R * TangoPoseResult(m).stateEsti_Tango(1:3) + t);
-    TangoPoseResult(m).stateEsti_Tango = transformedTangoPose;
-end
-
-
-% label consistent WiFi RSSI vector with Tango VIO location
 numWiFiScan = size(wifiScanResult,2);
-for m = 1:numWiFiScan
-    
-    % find the closest Tango pose timestamp and true location
-    [timeDifference, indexTango] = min(abs(wifiScanResult(m).timestamp - [TangoPoseResult.timestamp]));
-    if (timeDifference < 0.5)
-        wifiScanResult(m).trueLocation = TangoPoseResult(indexTango).stateEsti_Tango;
+
+
+% parse FLP.txt file / find the closest Google FLP
+GoogleFLPResult = parseGoogleFLPTextFile([datasetDirectory '/FLP.txt']);
+GoogleFLPTime = [GoogleFLPResult(:).timestamp];
+maximumTimeDifference = 2.0;   % second
+for k = 1:numWiFiScan
+    [timeDifference, indexGoogleFLP] = min(abs(wifiScanResult(k).timestamp - GoogleFLPTime));
+    if (timeDifference <= maximumTimeDifference)
+        wifiScanResult(k).FLPLocation = GoogleFLPResult(indexGoogleFLP).locationDegree;
+        wifiScanResult(k).FLPAccuracy = GoogleFLPResult(indexGoogleFLP).accuracyMeter;
     end
 end
 
 
-% refine unlabeled WiFi scan result
-for m = numWiFiScan:-1:1
-    if (isempty(wifiScanResult(m).trueLocation))
-        wifiScanResult(m) = [];
+% refine invalid WiFi scan result
+FLPAccuracyThreshold = 25.0;   % meter
+for k = numWiFiScan:-1:1
+    if (isempty(wifiScanResult(k).FLPAccuracy) || (wifiScanResult(k).FLPAccuracy > FLPAccuracyThreshold))
+        wifiScanResult(k) = [];
     end
 end
 
