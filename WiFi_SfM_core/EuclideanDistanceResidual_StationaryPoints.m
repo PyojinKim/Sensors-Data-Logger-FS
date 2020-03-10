@@ -1,4 +1,4 @@
-function [residuals] = EuclideanDistanceResidual(roninInitialLocation, roninPolarSpeed, roninPolarAngle, roninStationaryPointIndex, X)
+function [residuals] = EuclideanDistanceResidual_StationaryPoints(roninInitialLocation, roninPolarSpeed, roninPolarAngle, roninStationaryPointIndex, X)
 
 % RoNIN drift correction model
 roninLocation = DriftCorrectedRoninAbsoluteAngleModel(roninInitialLocation, roninPolarSpeed, roninPolarAngle, X);
