@@ -1,7 +1,8 @@
-function [residuals] = EuclideanDistanceResidual_GoogleFLP(roninInitialLocation, roninPolarSpeed, roninPolarAngle, roninGoogleFLPIndex, roninGoogleFLPLocation, X)
+function [residuals] = EuclideanDistanceResidual_GoogleFLP(roninPolarSpeed, roninPolarAngle, roninGoogleFLPIndex, roninGoogleFLPLocation, X)
 
 % RoNIN drift correction model
-roninLocation = DriftCorrectedRoninAbsoluteAngleModel(roninInitialLocation, roninPolarSpeed, roninPolarAngle, X);
+[initialLocation, scale, bias] = unpackDriftCorrectionModelParameters(X);
+roninLocation = DriftCorrectedRoninAbsoluteAngleModel(initialLocation, roninPolarSpeed, roninPolarAngle, scale, bias);
 
 
 % (1) residuals for Google FLP location
@@ -11,12 +12,8 @@ residualGoogleFLP = vecnorm(roninLocationError);
 
 
 % (2) residuals for scale/bias changes in RoNIN drift correction model
-numRonin = size(roninPolarSpeed,2);
-roninScale = X(1:numRonin);
-roninBias = X((numRonin+1):end);
-
-scaleRegularization = (roninScale - 1);
-biasDifference = diff(roninBias);
+scaleRegularization = (scale - 1);
+biasDifference = diff(bias);
 
 
 % (3) final residuals for nonlinear optimization

@@ -1,12 +1,7 @@
-function [roninLocation] = DriftCorrectedRoninAbsoluteAngleModel(roninInitialLocation, roninPolarSpeed, roninPolarAngle, X_Drift_Correction_Model)
-
-% common parameter setting for this function
-numRonin = size(roninPolarSpeed,2);
-roninScale = X_Drift_Correction_Model(1:numRonin);
-roninBias = X_Drift_Correction_Model((numRonin+1):end);
-
+function [roninLocation] = DriftCorrectedRoninAbsoluteAngleModel(roninInitialLocation, roninPolarSpeed, roninPolarAngle, roninScale, roninBias)
 
 % compute drift-corrected 2D RoNIN location
+numRonin = size(roninPolarSpeed,2);
 roninLocation = zeros(2,numRonin);
 roninLocation(:,1) = roninInitialLocation;
 for k = 2:numRonin

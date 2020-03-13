@@ -94,23 +94,13 @@ end
 
 
 % extract RoNIN on moving trajectory
-roninMovingResult = cell(1,numMovingTrajectory);
+roninMovingPartResult = [];
+scaleResult = [];
+biasResult = [];
 for k = 1:numMovingTrajectory
     
     % assign current RoNIN moving trajectory
     roninMovingPart = roninResult(movingTrajectoryIndex{k});
-    roninStationaryPart = roninResult(stationaryPointIndex{k});
-    
-    
-    % align RoNIN / Google FLP start location
-    roninStartLocation = roninMovingPart(1).location;
-    GoogleStartLocation = roninStationaryPart(1).FLPLocation;
-    for m = 1:size(roninMovingPart,2)
-        roninMovingPart(m).location = roninMovingPart(m).location - roninStartLocation;
-        if (~isempty(roninMovingPart(m).FLPLocation))
-            roninMovingPart(m).FLPLocation = roninMovingPart(m).FLPLocation - GoogleStartLocation;
-        end
-    end
     
     
     % Google FLP constraints
@@ -123,22 +113,36 @@ for k = 1:numMovingTrajectory
     roninGoogleFLPLocation = [roninMovingPart(:).FLPLocation];
     
     
-    %
-    [roninMovingPart,~,~] = optimizeRoninMovingTrajectory(roninMovingPart, roninGoogleFLPIndex, roninGoogleFLPLocation);
+    % if there is no Google FLP constraint
+    if (isempty(roninGoogleFLPIndex))
+        continue;
+    end
     
     
-    
-    
-    
-    roninMovingResult{k} = roninMovingPart;
+    % nonlinear optimization with RoNIN drift correction model
+    [roninMovingPart, scale, bias] = optimizeRoninMovingTrajectory(roninMovingPart, roninGoogleFLPIndex, roninGoogleFLPLocation);
+    roninMovingPartResult = [roninMovingPartResult, roninMovingPart];
+    scaleResult = [scaleResult, scale];
+    biasResult = [biasResult, bias];
+end
+
+
+temp = [];
+for k = 1:numMovingTrajectory
+    temp = [temp, [roninMovingPartResult{k}.location]];
 end
 
 
 
+% plot RoNIN 2D trajectory (left) & GPS trajectory on Google map (right)
+h_plot = figure;
+plot(temp(1,:),temp(2,:),'m-','LineWidth',2.5); hold on; grid on; axis equal; axis tight;
 
 
 
-
+plot(roninFLPLocation(1,:), roninFLPLocation(2,:),'b*-','LineWidth',1.0); hold on;
+xlabel('X [m]','FontName','Times New Roman','FontSize',15);
+ylabel('Y [m]','FontName','Times New Roman','FontSize',15);
 
 
 

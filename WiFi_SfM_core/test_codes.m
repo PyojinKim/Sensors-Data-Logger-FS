@@ -1,7 +1,23 @@
 
 
+% align RoNIN / Google FLP start location
+roninStartLocation = roninMovingPart(1).location;
+
+[a,b] = min([roninStationaryPart.FLPAccuracy]);
+temp = [roninStationaryPart.FLPLocation];
+GoogleStartLocation = temp(:,b);
+%GoogleStartLocation = roninStationaryPart(1).FLPLocation;
 
 
+for m = 1:size(roninMovingPart,2)
+    roninMovingPart(m).location = roninMovingPart(m).location - roninStartLocation;
+    if (~isempty(roninMovingPart(m).FLPLocation))
+        roninMovingPart(m).FLPLocation = roninMovingPart(m).FLPLocation - GoogleStartLocation;
+    end
+end
+
+
+%%
 
 
 % re-package RoNIN data for figures
