@@ -12,16 +12,17 @@ addpath('devkit_KITTI_GPS');
 % extract RoNIN data
 expCase = 27;
 setupParams_alignment_Prof_Yasu;
-roninResult = extractRoninOnlyData(datasetDirectory, roninInterval, roninYawRotation);
+roninResult = extractRoninCentricData(datasetDirectory, roninInterval, roninYawRotation);
 
 
 % refine invalid RoNIN result from Google FLP
 FLPAccuracyThreshold = 25.0;   % meter
 numRonin = size(roninResult,2);
 for k = 1:numRonin
-    if (roninResult(k).FLPAccuracy > FLPAccuracyThreshold)
-        roninResult(k).FLPLocation = [];
-        roninResult(k).FLPAccuracy = [];
+    if (roninResult(k).FLPAccuracyMeter > FLPAccuracyThreshold)
+        roninResult(k).FLPLocationDegree = [];
+        roninResult(k).FLPLocationMeter = [];
+        roninResult(k).FLPAccuracyMeter = [];
     end
 end
 
@@ -34,8 +35,8 @@ roninResult = removeStationaryMotion(roninResult);
 
 
 % re-package RoNIN data for figures
-roninLocation = [roninResult(:).location];
-roninFLPLocation = [roninResult(:).FLPLocation];
+roninLocation = [roninResult.location];
+roninFLPLocationDegree = [roninResult.FLPLocationDegree];
 
 
 % plot RoNIN 2D trajectory (left) & GPS trajectory on Google map (right)
@@ -45,7 +46,7 @@ plot(roninLocation(1,:),roninLocation(2,:),'k-','LineWidth',1.5); grid on; axis 
 xlabel('X [m]','FontName','Times New Roman','FontSize',15);
 ylabel('Y [m]','FontName','Times New Roman','FontSize',15);
 subplot(1,2,2);
-plot(roninFLPLocation(2,:), roninFLPLocation(1,:),'b*-','LineWidth',1.0);
+plot(roninFLPLocationDegree(2,:), roninFLPLocationDegree(1,:),'b*-','LineWidth',1.0);
 plot_google_map('maptype', 'roadmap', 'APIKey', 'AIzaSyB_uD1rGjX6MJkoQgSDyjHkbdu-b-_5Bjg');
 xlabel('Longitude [deg]','FontName','Times New Roman','FontSize',15);
 ylabel('Latitude [deg]','FontName','Times New Roman','FontSize',15);
@@ -68,86 +69,78 @@ isGoogleFLPInitialized = false;
 for k = 1:numRonin
     
     % check Google FLP exists or not
-    if (~isempty(roninResult(k).FLPLocation))
+    if (~isempty(roninResult(k).FLPLocationDegree))
         
         % define Google FLP scale, origin in meter
         if (~isGoogleFLPInitialized)
             isGoogleFLPInitialized = true;
             
-            scaleRef = latToScale(roninResult(k).FLPLocation(1));
-            latitude = roninResult(k).FLPLocation(1);
-            longitude = roninResult(k).FLPLocation(2);
+            scaleRef = latToScale(roninResult(k).FLPLocationDegree(1));
+            latitude = roninResult(k).FLPLocationDegree(1);
+            longitude = roninResult(k).FLPLocationDegree(2);
             [XRef,YRef] = latlonToMercator(latitude, longitude, scaleRef);
         end
         
         
         % convert lat/lon coordinates (deg) to mercator coordinates (m)
-        latitude = roninResult(k).FLPLocation(1);
-        longitude = roninResult(k).FLPLocation(2);
+        latitude = roninResult(k).FLPLocationDegree(1);
+        longitude = roninResult(k).FLPLocationDegree(2);
         [X,Y] = latlonToMercator(latitude, longitude, scaleRef);
         
         X = X - XRef;
         Y = Y - YRef;
-        roninResult(k).FLPLocation = [X;Y];
+        roninResult(k).FLPLocationMeter = [X;Y];
     end
 end
 
 
 % extract RoNIN on moving trajectory
 roninMovingPartResult = [];
-scaleResult = [];
-biasResult = [];
 for k = 1:numMovingTrajectory
     
     % assign current RoNIN moving trajectory
-    roninMovingPart = roninResult(movingTrajectoryIndex{k});
-    
-    
-    % Google FLP constraints
-    roninGoogleFLPIndex = [];
-    for m = 1:size(roninMovingPart,2)
-        if (~isempty(roninMovingPart(m).FLPLocation))
-            roninGoogleFLPIndex = [roninGoogleFLPIndex, m];
-        end
-    end
-    roninGoogleFLPLocation = [roninMovingPart(:).FLPLocation];
-    
-    
-    % if there is no Google FLP constraint
-    if (isempty(roninGoogleFLPIndex))
-        continue;
-    end
+    RoninIO = roninResult(movingTrajectoryIndex{k});
     
     
     % nonlinear optimization with RoNIN drift correction model
-    [roninMovingPart, scale, bias] = optimizeRoninMovingTrajectory(roninMovingPart, roninGoogleFLPIndex, roninGoogleFLPLocation);
-    roninMovingPartResult = [roninMovingPartResult, roninMovingPart];
-    scaleResult = [scaleResult, scale];
-    biasResult = [biasResult, bias];
+    [RoninIO] = optimizeEachRoninIO(RoninIO);
+    roninMovingPartResult = [roninMovingPartResult, RoninIO];
 end
 
 
-temp = [];
-for k = 1:numMovingTrajectory
-    temp = [temp, [roninMovingPartResult{k}.location]];
-end
+%%
 
+
+% re-package RoNIN data for figures
+roninLocation = [roninMovingPartResult.location];
+roninFLPLocationMeter = [roninMovingPartResult.FLPLocationMeter];
 
 
 % plot RoNIN 2D trajectory (left) & GPS trajectory on Google map (right)
 h_plot = figure;
-plot(temp(1,:),temp(2,:),'m-','LineWidth',2.5); hold on; grid on; axis equal; axis tight;
-
-
-
-plot(roninFLPLocation(1,:), roninFLPLocation(2,:),'b*-','LineWidth',1.0); hold on;
+plot(roninLocation(1,:),roninLocation(2,:),'m-','LineWidth',2.5); hold on; grid on; axis equal; axis tight;
+plot(roninFLPLocationMeter(1,:), roninFLPLocationMeter(2,:),'b*-','LineWidth',1.5); hold on;
 xlabel('X [m]','FontName','Times New Roman','FontSize',15);
 ylabel('Y [m]','FontName','Times New Roman','FontSize',15);
 
 
 
 
-
+% plot scale and bias model parameters for RoNIN drift correction
+figure;
+subplot(2,1,1);
+h_optimal = plot(scaleResult,'m','LineWidth',1.5); hold on; grid on; axis tight;
+set(gcf,'color','w'); hold off;
+set(get(gcf,'CurrentAxes'),'FontName','Times New Roman','FontSize',17);
+xlabel('Scale Model Parameter Index','FontName','Times New Roman','FontSize',17);
+ylabel('Scale','FontName','Times New Roman','FontSize',17);
+subplot(2,1,2);
+plot(biasResult,'m','LineWidth',1.5); hold on; grid on; axis tight;
+set(gcf,'color','w'); hold off;
+set(get(gcf,'CurrentAxes'),'FontName','Times New Roman','FontSize',17);
+xlabel('Bias Model Parameter Index','FontName','Times New Roman','FontSize',17);
+ylabel('Bias','FontName','Times New Roman','FontSize',17);
+set(gcf,'Units','pixels','Position',[900 300 800 600]);  % modify figure
 
 
 

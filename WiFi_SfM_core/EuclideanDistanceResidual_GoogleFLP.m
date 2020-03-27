@@ -1,24 +1,38 @@
-function [residuals] = EuclideanDistanceResidual_GoogleFLP(roninPolarSpeed, roninPolarAngle, roninGoogleFLPIndex, roninGoogleFLPLocation, X)
+function [residuals] = EuclideanDistanceResidual_GoogleFLP(sensorMeasurements, X)
 
-% RoNIN drift correction model
-[initialLocation, scale, bias] = unpackDriftCorrectionModelParameters(X);
-roninLocation = DriftCorrectedRoninAbsoluteAngleModel(initialLocation, roninPolarSpeed, roninPolarAngle, scale, bias);
+% unpack sensor measurements
+RoninPolarVIODistance = sensorMeasurements.RoninPolarVIODistance;
+RoninPolarVIOAngle = sensorMeasurements.RoninPolarVIOAngle;
+RoninGoogleFLPIndex = sensorMeasurements.RoninGoogleFLPIndex;
+RoninGoogleFLPLocation = sensorMeasurements.RoninGoogleFLPLocation;
+RoninGoogleFLPAccuracy = sensorMeasurements.RoninGoogleFLPAccuracy;
+
+
+% Ronin IO drift correction model
+%[startLocation, rotation, scale, bias] = unpackDriftCorrectionModelParameters(X);
+startLocation = X(1:2);
+rotation = X(3);
+numRoninIO = size(RoninPolarVIODistance,2);
+scale = ones(1,numRoninIO);
+bias = zeros(1,numRoninIO);
+RoninIOLocation = DriftCorrectedRoninIOAbsoluteAngleModel(startLocation, rotation, scale, bias, RoninPolarVIODistance, RoninPolarVIOAngle);
 
 
 % (1) residuals for Google FLP location
-roninEstimatedLocation = roninLocation(:,roninGoogleFLPIndex);
-roninLocationError = (roninEstimatedLocation - roninGoogleFLPLocation);
-residualGoogleFLP = vecnorm(roninLocationError);
+RoninEstimatedLocation = RoninIOLocation(:,RoninGoogleFLPIndex);
+RoninLocationNormError = vecnorm(RoninEstimatedLocation - RoninGoogleFLPLocation);
+residualGoogleFLP = max((RoninLocationNormError - RoninGoogleFLPAccuracy), 0);
 
 
-% (2) residuals for scale/bias changes in RoNIN drift correction model
+% (2) residuals for scale/bias changes in Ronin IO drift correction model
 scaleRegularization = (scale - 1);
-biasDifference = diff(bias);
+biasRegularization = (bias - 0);
 
 
 % (3) final residuals for nonlinear optimization
-residuals = [residualGoogleFLP, scaleRegularization, biasDifference].';
-%residuals = [residualGoogleFLP].';
+%residuals = [residualGoogleFLP, scaleRegularization, biasDifference].';
+%residuals = [residualGoogleFLP, scaleRegularization, biasRegularization].';
+residuals = [residualGoogleFLP].';
 
 
 end
