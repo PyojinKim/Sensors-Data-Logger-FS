@@ -1,5 +1,79 @@
 
 
+
+% Google FLP visualization
+for k = 1:numDatasetList
+    
+    % current RoNIN IO data
+    RoninIO = datasetRoninIO{k};
+    RoninIOLocation = [RoninIO.location];
+    
+    
+    % plot RoNIN IO location
+    distinguishableColors = distinguishable_colors(numDatasetList);
+    figure(10); hold on; grid on; axis equal; axis tight;
+    plot(RoninIOLocation(1,:),RoninIOLocation(2,:),'-','color',distinguishableColors(k,:),'LineWidth',1.5); grid on; axis equal;
+    xlabel('X [m]','FontName','Times New Roman','FontSize',15);
+    ylabel('Y [m]','FontName','Times New Roman','FontSize',15);
+    set(gcf,'Units','pixels','Position',[150 60 1700 900]);  % modify figure
+end
+
+
+
+%%
+
+
+for k = 1:numDatasetList
+    
+    RoninIOMovingTrajectory = datasetRoninIOMovingTrajectory{k};
+    
+    % plot RoNIN moving trajectories
+    for m = 1:size(RoninIOMovingTrajectory,2)
+        
+        % current moving trajectory
+        RoninIO = RoninIOMovingTrajectory{m};
+        if (isempty(RoninIO))
+            continue;
+        end
+        RoninIOLocation = [RoninIO.location];
+        
+        
+        % plot RoNIN IO location
+        distinguishableColors = distinguishable_colors(numDatasetList);
+        figure(10); hold on; grid on; axis equal; axis tight;
+        plot(RoninIOLocation(1,:),RoninIOLocation(2,:),'-','color',distinguishableColors(k,:),'LineWidth',1.5); grid on; axis equal;
+        xlabel('X [m]','FontName','Times New Roman','FontSize',15);
+        ylabel('Y [m]','FontName','Times New Roman','FontSize',15);
+        set(gcf,'Units','pixels','Position',[150 60 1700 900]);  % modify figure
+    end
+    set(gcf,'Units','pixels','Position',[150 60 1700 900]);  % modify figure
+end
+
+
+%%
+
+% re-package RoNIN data for figures
+roninLocation = [RoninIO.location];
+roninFLPLocationDegree = [RoninIO.FLPLocationDegree];
+
+
+% plot RoNIN 2D trajectory (left) & GPS trajectory on Google map (right)
+figure;
+subplot(1,2,1);
+plot(roninLocation(1,:),roninLocation(2,:),'k-','LineWidth',1.5); grid on; axis equal; axis tight;
+xlabel('X [m]','FontName','Times New Roman','FontSize',15);
+ylabel('Y [m]','FontName','Times New Roman','FontSize',15);
+subplot(1,2,2);
+plot(roninFLPLocationDegree(2,:), roninFLPLocationDegree(1,:),'b*-','LineWidth',1.0);
+plot_google_map('maptype', 'roadmap', 'APIKey', 'AIzaSyB_uD1rGjX6MJkoQgSDyjHkbdu-b-_5Bjg');
+xlabel('Longitude [deg]','FontName','Times New Roman','FontSize',15);
+ylabel('Latitude [deg]','FontName','Times New Roman','FontSize',15);
+set(gcf,'Units','pixels','Position',[150 300 1700 600]);  % modify figure
+
+
+%%
+
+
 % align RoNIN / Google FLP start location
 roninStartLocation = roninMovingPart(1).location;
 

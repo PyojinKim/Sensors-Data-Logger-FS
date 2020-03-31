@@ -1,4 +1,4 @@
-function [RoninIO] = extractRoninCentricData(datasetDirectory, roninInterval, roninYawRotation)
+function [RoninIO] = extractRoninCentricData(datasetDirectory, roninInterval, roninYawRotation, accuracyThreshold)
 
 % parse ronin.txt file / compute RoNIN velocity and speed
 RoninIO = parseRoninTextFile([datasetDirectory '/ronin.txt'], roninInterval, roninYawRotation);
@@ -42,6 +42,17 @@ for k = 1:numGoogleFLP
         RoninIO(indexRoninIO).FLPLocationDegree = locationDegree;
         RoninIO(indexRoninIO).FLPLocationMeter = locationMeter;
         RoninIO(indexRoninIO).FLPAccuracyMeter = accuracyMeter;
+    end
+end
+
+
+% refine invalid RoNIN result from Google FLP
+numRonin = size(RoninIO,2);
+for k = 1:numRonin
+    if (RoninIO(k).FLPAccuracyMeter > accuracyThreshold)
+        RoninIO(k).FLPLocationDegree = [];
+        RoninIO(k).FLPLocationMeter = [];
+        RoninIO(k).FLPAccuracyMeter = [];
     end
 end
 
